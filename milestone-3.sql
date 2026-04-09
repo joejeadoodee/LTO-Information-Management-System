@@ -100,7 +100,7 @@ WHERE l.license_type = 'Professional'
 -- View all vehicles owned by a given driver
 SELECT v.* FROM vehicle v
 JOIN driver d ON v.driver_id = d.driver_id
-WHERE d.license_number = 'N01-15-000001';
+WHERE d.full_name = d.license_number;
 
 -- View all vehicles with expired registrations as of given date
 SELECT v.*, vr.expiration_date
