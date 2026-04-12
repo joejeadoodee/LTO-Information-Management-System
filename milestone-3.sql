@@ -25,7 +25,7 @@ CREATE TABLE vehicle (
 
 CREATE TABLE vehicleRegistration (
   vehicle_reg_id INT AUTO_INCREMENT PRIMARY KEY,
-  registration_no INT(9) UNIQUE NOT NULL,
+  registration_no VARCHAR(9) UNIQUE NOT NULL,
   registration_date DATE NOT NULL,
   expiration_date DATE NOT NULL,
   registration_status ENUM ('active', 'expired', 'suspended') NOT NULL,
@@ -78,8 +78,8 @@ INSERT INTO vehicle (plate_no, engine_no, chassis_no, vehicle_type, make, model,
 ('JCC1206', '53WVC10338', 'JHMCB514XPS001234', 'Private Car', 'Mitsubishi', 'Xpander', 2019, 'Quartz White Pearl', 2);
 
 INSERT INTO vehicleRegistration (registration_no, registration_date, expiration_date, registration_status, vehicle_id) VALUES
-(100000001, '2025-01-01', '2026-01-01', 'active', 1),
-(100000002, '2023-01-01', '2024-01-01', 'expired', 2);
+("100000001", '2025-01-01', '2026-01-01', 'active', 1),
+("100000002", '2023-01-01', '2024-01-01', 'expired', 2);
 
 INSERT INTO traffic_violation (violation_type, violation_date_time, location, fine_amount, violation_status, officer_name, driver_id, vehicle_id) VALUES
 ('Overspeeding', '2025-03-01 14:30:00', 'SLEX, Manila', 2000.00, 'unpaid', 'Sgt. Dalisay', 1, 1);
@@ -100,7 +100,7 @@ WHERE l.license_type = 'Professional'
 -- View all vehicles owned by a given driver
 SELECT v.* FROM vehicle v
 JOIN driver d ON v.driver_id = d.driver_id
-WHERE d.full_name = d.license_number;
+WHERE d.full_name = ?; -- place holder for now
 
 -- View all vehicles with expired registrations as of given date
 SELECT v.*, vr.expiration_date
