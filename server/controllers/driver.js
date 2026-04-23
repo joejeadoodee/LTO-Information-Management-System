@@ -2,8 +2,50 @@ import pool from "../db/database.js";
 
 const getAllDrivers = async (req, res) => {
   try {
-    const [rows] = await pool.query("SELECT * FROM driver");
-    res.status(200).json({ success: true, data: rows });
+    // Get drivers and their licenes
+    // Order based on license_issuance_date from latest to oldest
+    const [rows] = await pool.query(`
+      SELECT d.*, l.* 
+      FROM driver d 
+      LEFT JOIN license l 
+      ON d.driver_id = l.driver_id 
+      ORDER BY d.driver_id, l.license_issuance_date DESC;
+      `);
+
+    // Map drivers to a hashmap
+    const driverMap = {};
+    rows.forEach((row) => {
+      // Separate driver fields and license fields
+      const {
+        driver_id,
+        license_number,
+        full_name,
+        date_of_birth,
+        sex,
+        address,
+        ...licenseFields
+      } = row;
+
+      if (!driverMap.hasOwnProperty(row.driver_id)) {
+        driverMap[row.driver_id] = {
+          driver_id,
+          license_number,
+          full_name,
+          date_of_birth,
+          sex,
+          address,
+          license_issuances: [],
+        };
+      }
+
+      // Only add license if it exists
+      if (licenseFields.issue_id) {
+        driverMap[row.driver_id].license_issuances.push({ ...licenseFields });
+      }
+    });
+
+    // Return values as array of objects
+    res.status(200).json({ success: true, data: Object.values(driverMap) });
   } catch (err) {
     res.status(500).json({ success: false, msg: err.message });
   }

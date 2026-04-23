@@ -1,3 +1,7 @@
+-- Drop database and user first
+DROP DATABASE IF EXISTS lto;
+DROP USER IF EXISTS 'ltoadmin'@'localhost';
+
 -- CREATE DATABASE AND USER WITH PRIVILEGES
 CREATE DATABASE IF NOT EXISTS lto;
 CREATE USER IF NOT EXISTS 'ltoadmin'@'localhost' IDENTIFIED BY '1234';
