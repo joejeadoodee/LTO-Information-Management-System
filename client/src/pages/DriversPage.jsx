@@ -13,16 +13,26 @@ function DriversPage() {
   }, []);
 
   // Create set of divs for each driver item
-  const driversDisplay = drivers.map((driver, ind) => (
-    <>
-      <div className="item">{driver.license_number}</div>
-      <div className="item">{driver.full_name}</div>{" "}
-      <div className="item">{driver.date_of_birth.toDateString().slice(4)}</div>
-      <div className="item">{driver.sex}</div>
-      <div className="item">{driver.address}</div>
-      <div className="item">ACTION</div>
-    </>
-  ));
+  const driversDisplay = drivers.map((driver) => {
+    const latestLicense = driver.license_issuances[0];
+    return (
+      <>
+        <div className="item">{driver.license_number}</div>
+        <div className="item">{driver.full_name}</div>{" "}
+        <div className="item">
+          {driver.date_of_birth.toDateString().slice(4)}
+        </div>
+        <div className="item">{driver.sex}</div>
+        <div className="item">{driver.address}</div>
+        <div className="item">{latestLicense.license_status}</div>
+        <div className="item">{latestLicense.license_type}</div>
+        <div className="item">
+          {latestLicense.license_expiration_date.toDateString().slice(4)}
+        </div>
+        <div className="item">ACTION</div>
+      </>
+    );
+  });
 
   // Only render table if drivers is not empty
   return (
@@ -34,20 +44,20 @@ function DriversPage() {
           Add Driver
         </button>
         {drivers.length > 0 ? (
-          <div className="table">
-            <div className="header">LICENSE NUMBER</div>
-            <div className="header">FULL NAME</div>{" "}
-            <div className="header">DATE OF BIRTH</div>{" "}
-            <div className="header">SEX</div>
-            <div className="header">ADDRESS</div>
-            <div className="header">ACTION</div>
-            {driversDisplay}
-            <div className="header">LICENSE NUMBER</div>
-            <div className="header">FULL NAME</div>{" "}
-            <div className="header">DATE OF BIRTH</div>{" "}
-            <div className="header">SEX</div>
-            <div className="header">ADDRESS</div>
-            <div className="header">ACTION</div>
+          <div className="table-container">
+            <div className="table header">
+              <div className="item">LICENSE NUMBER</div>
+              <div className="item">FULL NAME</div>{" "}
+              <div className="item">BIRTHDAY</div>{" "}
+              <div className="item">SEX</div>
+              <div className="item">ADDRESS</div>
+              <div className="item">STATUS</div>
+              <div className="item">TYPE</div>
+              <div className="item">EXPIRATION DATE</div>
+              <div className="item">ACTION</div>
+            </div>
+            <div className="table content">{driversDisplay}</div>
+            <div className="table footer">tite</div>
           </div>
         ) : undefined}
       </main>
