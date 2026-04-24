@@ -1,18 +1,58 @@
-# HOW TO RUN / TEST THE API
-
 Some notes first. Most of the content of the server are AI generated boiler plate, further testing is required. The client side front-end still needs to be done.
 
-### Requirements for testing
+```
+Sorry guys magulo code ko huhu chat na lang kayo if may tanong kau
+
+Syntax Notes
+
+function funcName({foo, bar, bazz}){}
+-- Basically, if the function input is an object, object.foo, object.bar, and object.bazz are automatically accessible as variables
+
+const {objItem} = obj;
+-- If obj has an item, it is decontructed
+-- Example: const obj = {objItem: "Hellow", objItem2: "not gonna be accessed"}
+
+            const {objItem} = obj;
+            console.log(objItem); // Output: Hellow
+
+const obj = {foo: "foo", bar: "bar"}
+const copy = {...obj}
+-- Deconstructing all items of an object
+-- Continuation of the code above:
+            console.log(copy); //{foo: "foo", bar: "bar"}
+
+// Continuation from code above
+const objCopyWithDifferentFoo = {...obj, foo: "changedFoo"}
+-- Equivalent to:
+            objCopyWithDifferentFoo = {...obj}
+            objCopyWithDifferentFoo.foo = "changedFoo"
+
+const newArray = array.map((arrayItem) => returnValue);
+-- Loops through each values of an array and creates a new array of the return values
+
+```
+
+# Requirements for testing
 
 1. Nodejs/ npm
 2. EchoAPI VS Code Extension
-
-### Steps
 
 First, clone the repository
 
     git clone https://github.com/joejeadoodee/LTO-Information-Management-System.git
     cd LTO-Information-Management-System
+
+# HOW TO RUN FRONT END
+
+    cd client
+    npm install
+    npm run dev
+
+leave the terminal running, then open [localhost:5173](http://localhost:5173) on any browser
+
+to access backend from frontend, axios was used. See client/src/services/drivers.js. [Axios API Docs](https://axios-http.com/docs/api_intro)
+
+# HOW TO RUN BACKEND
 
 From the base folder, login to mariadb as root, run the setup file, and open the lto database.
 
@@ -31,7 +71,11 @@ While still in the server folder, install the dependencies, and run the database
     npm install
     npm run dev
 
-Make sure that both the mariadb instance and server instance are both active. Now, open EchoAPI from vscode, or any API Tester.
+Make sure that both the mariadb instance and server instance are both active. You can now reaccess [localhost:5173](http://localhost:5173) and see the data displayed.
+
+### For API Testing
+
+Now, open EchoAPI from vscode, or any API Tester.
 
 1. Click HTTP1/2 Request
 2. Select the correct http method

@@ -3,7 +3,7 @@ import { addLicense } from "./license";
 
 async function getAllDrivers() {
   try {
-    // Equivalent to response.data.data
+    // Equivalent to response.data.data (deconstructing)
     const {
       data: { data },
     } = await axios.get("/api/driver");

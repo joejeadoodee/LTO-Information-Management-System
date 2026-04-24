@@ -3,11 +3,13 @@ import { addDriver } from "../services/drivers";
 function DriverModalAdd({ setShow }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Get values from form
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData);
     await addDriver(data);
-    setShow(false);
-    window.location.reload();
+    setShow(false); // hide modal
+    window.location.reload(); // reload to update page
   };
 
   return (

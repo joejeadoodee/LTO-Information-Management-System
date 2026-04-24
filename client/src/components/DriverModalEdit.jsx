@@ -4,8 +4,12 @@ import { addLicense } from "../services/license";
 function DriverModalEdit({ setShow, data: driver }) {
   const handleDriverSubmit = async (e) => {
     e.preventDefault();
+
+    // Get data from driver form
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData);
+
+    // Add driver id and license number to data
     await updateDriver({
       ...data,
       driver_id: driver.driver_id,
@@ -17,13 +21,16 @@ function DriverModalEdit({ setShow, data: driver }) {
 
   const handleLicenseSubmit = async (e) => {
     e.preventDefault();
+
+    // Get data from license form
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData);
-    await addLicense({ ...data, driver_id: driver.driver_id });
+    await addLicense({ ...data, driver_id: driver.driver_id }); // Add driver id to data
     setShow(false);
     window.location.reload();
   };
 
+  // Loop through driver licenses and create a row for each
   const issuances = driver.license_issuances.map((issuance) => (
     <>
       <div className="item">

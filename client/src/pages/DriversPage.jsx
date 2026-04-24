@@ -7,6 +7,7 @@ import DriverModalEdit from "../components/DriverModalEdit.jsx";
 import "../styles/drivers.css";
 
 function DriversPage() {
+  // Page/component states initialization
   const [drivers, setDrivers] = useState([]);
   const [showAdd, setShowAdd] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
@@ -17,8 +18,10 @@ function DriversPage() {
     getAllDrivers().then((data) => setDrivers(data));
   }, []);
 
-  // Create set of divs for each driver item
+  // Loop through drivers and create a row display for each
   const driversDisplay = drivers.map((driver) => {
+    // License is ordered from latest to oldest
+    // There might be drivers with no license
     const latestLicense = driver.license_issuances[0];
 
     return (
@@ -39,8 +42,8 @@ function DriversPage() {
           <button
             className="button-behave view"
             onClick={() => {
-              setShowEdit(true);
               setEditContent(driver);
+              setShowEdit(true);
             }}
           >
             View
@@ -48,10 +51,9 @@ function DriversPage() {
           <button
             className="button-behave delete"
             onClick={() => {
-              // Delete driver from data base
-              // Filter out the deleted driver from state
               const deleteId = driver.driver_id;
-              deleteDriver(deleteId);
+              deleteDriver(deleteId); // db delete
+              // Display delete
               setDrivers((prev) =>
                 prev.filter((driver) => driver.driver_id !== deleteId),
               );
@@ -64,8 +66,6 @@ function DriversPage() {
     );
   });
 
-  // Only render table if drivers is not empty
-  // Show Add drivers modal on button click
   return (
     <>
       <Header />
@@ -77,16 +77,22 @@ function DriversPage() {
         >
           Add Driver
         </button>
+
+        {/* Only render add modal if showEdit is true*/}
         {showEdit ? (
           <DriverModalEdit setShow={setShowEdit} data={editContent} />
         ) : undefined}
+
+        {/* Only render add modal if showAdd is true*/}
         {showAdd ? <DriverModalAdd setShow={setShowAdd} /> : undefined}
+
+        {/* Only render table if drivers is not empty */}
         {drivers.length > 0 ? (
           <div className="table-container">
             <div className="table header">
               <div className="item">LICENSE NUMBER</div>
-              <div className="item">FULL NAME</div>{" "}
-              <div className="item">BIRTHDAY</div>{" "}
+              <div className="item">FULL NAME</div>
+              <div className="item">BIRTHDAY</div>
               <div className="item">SEX</div>
               <div className="item">ADDRESS</div>
               <div className="item">STATUS</div>
@@ -95,7 +101,6 @@ function DriversPage() {
               <div className="item">ACTION</div>
             </div>
             <div className="table content">{driversDisplay}</div>
-            <div className="table footer">tite</div>
           </div>
         ) : (
           <div className="no-results">No drivers yet</div>
