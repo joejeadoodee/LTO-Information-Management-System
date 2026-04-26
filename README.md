@@ -426,7 +426,7 @@ Create a new vehicle.
 - **Body (JSON):**
 
 ```json
-{
+{arvin-ferrer/
   "plate_no": "ABC1234",
   "engine_no": "ENG-00001",
   "chassis_no": "CHS-00001",
