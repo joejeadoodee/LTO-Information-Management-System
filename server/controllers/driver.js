@@ -230,9 +230,15 @@ const getFilteredDrivers = async (req, res) => {
 const getExpiredOrSuspendedDrivers = async (req, res) => {
   try {
     const [rows] = await pool.query(`
-      SELECT d.*, l.license_status
+      SELECT d.*, l.*
       FROM driver d
       JOIN license l ON d.driver_id = l.driver_id
+      JOIN (
+        SELECT driver_id, MAX(license_issuance_date) AS latest_date
+        FROM license
+        GROUP BY driver_id
+      ) latest ON l.driver_id = latest.driver_id
+              AND l.license_issuance_date = latest.latest_date
       WHERE l.license_status IN ('Expired', 'Suspended')
       ORDER BY l.license_status, d.full_name
     `);
@@ -258,6 +264,7 @@ const getDriverViolations = async (req, res) => {
       "SELECT * FROM driver WHERE driver_id = ?",
       [id],
     );
+
     if (existing.length === 0)
       return res
         .status(404)
@@ -265,13 +272,14 @@ const getDriverViolations = async (req, res) => {
 
     const [rows] = await pool.query(
       `
-      SELECT d.full_name, tv.violation_type, tv.violation_date_time, tv.fine_amount
+      SELECT d.*, tv.*
       FROM traffic_violation tv
       JOIN driver d ON tv.driver_id = d.driver_id
       WHERE d.driver_id = ?
         AND tv.violation_date_time BETWEEN ? AND ?
       ORDER BY tv.violation_date_time DESC
     `,
+
       [id, date_from, date_to],
     );
 

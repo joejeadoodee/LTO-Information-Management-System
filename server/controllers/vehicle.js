@@ -177,7 +177,7 @@ const getVehiclesExpiredRegistration = async (req, res) => {
        FROM vehicle v
        JOIN vehicleRegistration vr ON v.vehicle_id = vr.vehicle_id
        WHERE vr.expiration_date <= ?
-         OR vr.registration_status = 'expired'`,
+       `,
       [date],
     );
     res.status(200).json({ success: true, data: rows });
@@ -199,7 +199,7 @@ const getVehiclesByViolationLocation = async (req, res) => {
   try {
     const [rows] = await pool.query(
       `
-      SELECT DISTINCT v.*
+      SELECT DISTINCT v.*, tv.*
       FROM vehicle v
       JOIN traffic_violation tv ON v.vehicle_id = tv.vehicle_id
       WHERE tv.location LIKE ?

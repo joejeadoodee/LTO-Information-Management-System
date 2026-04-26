@@ -37,7 +37,6 @@ function RegistrationExpired() {
     if (!date) return;
 
     getVehiclesExpiredRegistration({ date }).then((data) => {
-      console.log(data);
       setReport(data);
       setShowModal(true);
     });
