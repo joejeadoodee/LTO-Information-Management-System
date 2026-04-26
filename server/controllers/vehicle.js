@@ -162,16 +162,24 @@ const getVehiclesByDriver = async (req, res) => {
   }
 };
 
-// View all vehicles with expired registrations
 const getVehiclesExpiredRegistration = async (req, res) => {
+  const { date } = req.query;
+
+  if (!date)
+    return res.status(400).json({
+      success: false,
+      msg: "Please provide date as a query param",
+    });
+
   try {
-    const [rows] = await pool.query(`
-      SELECT v.*, vr.expiration_date
-      FROM vehicle v
-      JOIN vehicleRegistration vr ON v.vehicle_id = vr.vehicle_id
-      WHERE vr.expiration_date <= CURDATE()
-        OR vr.registration_status = 'expired'
-    `);
+    const [rows] = await pool.query(
+      `SELECT v.*, vr.*
+       FROM vehicle v
+       JOIN vehicleRegistration vr ON v.vehicle_id = vr.vehicle_id
+       WHERE vr.expiration_date <= ?
+         OR vr.registration_status = 'expired'`,
+      [date],
+    );
     res.status(200).json({ success: true, data: rows });
   } catch (err) {
     res.status(500).json({ success: false, msg: err.message });
