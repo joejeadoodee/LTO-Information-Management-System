@@ -9,14 +9,13 @@
 
   * {
     margin: 0;
-
     padding: 0;
-
     box-sizing: border-box;
   }
 
   html {
     font-family: "Roboto";
     background-color: #f8f9ff;
+    font-size: 16px;
   }
 }

@@ -31,8 +31,7 @@ FROM
     vehicle v
     JOIN vehicleRegistration vr ON v.vehicle_id = vr.vehicle_id
 WHERE
-    vr.expiration_date <= CURDATE ()
-    OR vr.registration_status = 'expired';
+    vr.expiration_date <= CURDATE ();
 
 -- View all drivers with expired or suspended licenses
 SELECT

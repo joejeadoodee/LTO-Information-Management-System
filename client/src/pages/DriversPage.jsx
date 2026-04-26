@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { getFilteredDrivers, deleteDriver } from "../services/drivers.js";
 import Sidebar from "../components/Sidebar.jsx";
 import Header from "../components/Header.jsx";
-import DriverModalAdd from "../components/DriverModalAdd.jsx";
-import DriverModalEdit from "../components/DriverModalEdit.jsx";
-import DriverFilters from "../components/DriverFilters.jsx";
+import DriverModalAdd from "../components/DriverComponents/DriverModalAdd.jsx";
+import DriverModalEdit from "../components/DriverComponents/DriverModalEdit.jsx";
+import DriverFilters from "../components/DriverComponents/DriverFilters.jsx";
 import "../styles/drivers.css";
 
 function DriversPage() {
@@ -16,8 +16,7 @@ function DriversPage() {
   const [editContent, setEditContent] = useState({});
 
   useEffect(() => {
-    getFilteredDrivers(filter).then((data) => setDrivers(data));
-  }, [filter]);
+    getFilteredDrivers(filter).then((data) => setDrivers(data)); }, [filter]);
 
   // Loop through drivers and create a row display for each
   const driversDisplay = drivers.map((driver) => {
@@ -71,7 +70,7 @@ function DriversPage() {
     <>
       <Header />
       <Sidebar page="drivers" />
-      <main>
+      <main className="main">
         {/* Only render edit modal if showEdit is true*/}
         {showEdit ? (
           <DriverModalEdit setShow={setShowEdit} data={editContent} />
