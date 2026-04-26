@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { getFilteredDrivers, deleteDriver } from "../services/drivers.js";
 import Sidebar from "../components/Sidebar.jsx";
 import Header from "../components/Header.jsx";
-import DriverModalAdd from "../components/DriverComponents/DriverModalAdd.jsx";
-import DriverModalEdit from "../components/DriverComponents/DriverModalEdit.jsx";
-import DriverFilters from "../components/DriverComponents/DriverFilters.jsx";
+import DriverModalAdd from "../components/DriverModalAdd.jsx";
+import DriverModalEdit from "../components/DriverModalEdit.jsx";
+import DriverFilters from "../components/DriverFilters.jsx";
 import "../styles/drivers.css";
 
 function DriversPage() {
@@ -71,7 +71,7 @@ function DriversPage() {
     <>
       <Header />
       <Sidebar page="drivers" />
-      <main className="main">
+      <main>
         {/* Only render edit modal if showEdit is true*/}
         {showEdit ? (
           <DriverModalEdit setShow={setShowEdit} data={editContent} />

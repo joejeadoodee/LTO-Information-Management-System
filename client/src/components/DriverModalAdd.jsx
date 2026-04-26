@@ -1,4 +1,4 @@
-import { addDriver } from "../../services/drivers";
+import { addDriver } from "../services/drivers";
 
 function DriverModalAdd({ setShow }) {
   const handleSubmit = async (e) => {

@@ -6,11 +6,6 @@ function ReportsPage() {
     <>
       <Header />
       <Sidebar page="reports" />
-      <main className="grid">
-        <div className="bg-white">
-          <h3>Owned Vehicles by</h3>
-        </div>
-      </main>
     </>
   );
 }
