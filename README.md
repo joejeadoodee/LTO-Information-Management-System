@@ -1,34 +1,36 @@
 Some notes first. Most of the content of the server are AI generated boiler plate, further testing is required. The client side front-end still needs to be done.
 
 ```js
-Sorry guys magulo code ko huhu chat na lang kayo if may tanong kau
+// Sorry guys magulo code ko huhu chat na lang kayo if may tanong kau
 
-Syntax Notes
+// SYNTAX NOTES
 
 function funcName({foo, bar, bazz}){}
--- Basically, if the function input is an object, object.foo, object.bar, and object.bazz are automatically accessible as variables
+// Basically, if the function input is an object, object.foo, object.bar,
+// and object.bazz are automatically accessible as variables
 
 const {objItem} = obj;
--- If obj has an item, it is decontructed
--- Example: const obj = {objItem: "Hellow", objItem2: "not gonna be accessed"}
+// If obj has an item, it is decontructed
+// Example:
+            const obj = {objItem: "Hellow", objItem2: "not gonna be accessed"}
 
             const {objItem} = obj;
             console.log(objItem); // Output: Hellow
 
 const obj = {foo: "foo", bar: "bar"}
 const copy = {...obj}
--- Deconstructing all items of an object
--- Continuation of the code above:
+// Deconstructing all items of an object
+// Continuation of the code above:
             console.log(copy); //{foo: "foo", bar: "bar"}
 
 // Continuation from code above
 const objCopyWithDifferentFoo = {...obj, foo: "changedFoo"}
--- Equivalent to:
+// Equivalent to:
             objCopyWithDifferentFoo = {...obj}
             objCopyWithDifferentFoo.foo = "changedFoo"
 
 const newArray = array.map((arrayItem) => returnValue);
--- Loops through each values of an array and creates a new array of the return values
+// Loops through each values of an array and creates a new array of the return values
 
 ```
 
