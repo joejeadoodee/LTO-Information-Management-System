@@ -1,6 +1,6 @@
 Some notes first. Most of the content of the server are AI generated boiler plate, further testing is required. The client side front-end still needs to be done.
 
-```
+```js
 Sorry guys magulo code ko huhu chat na lang kayo if may tanong kau
 
 Syntax Notes
