@@ -1,4 +1,4 @@
-main {
+.main {
   width: calc(100dvw-288px);
   margin-left: 288px;
   margin-top: 48px;
@@ -110,43 +110,43 @@ main {
   overflow-y: scroll;
 }
 
-form input,
-form select {
+.main form input,
+.main form select {
   background-color: #ededee;
   padding: 5px 20px 5px 20px;
   border-radius: 30px;
 }
 
-form > div {
+.main form > div {
   display: flex;
   flex-direction: column;
   margin-bottom: 15px;
 }
 
-form h3 {
+.main form h3 {
   font-weight: 300;
   font-size: 20px;
   margin-top: 20px;
 }
 
-form .button-container {
+.main form .button-container {
   flex-direction: row;
   gap: 10px;
   justify-content: end;
 }
 
-form .button-container.center {
+.main form .button-container.center {
   justify-content: center;
 }
 
-form .button-container button {
+.main form .button-container button {
   background-color: #3f5f92;
   color: white;
   padding: 5px 10px 5px 10px;
   border-radius: 10px;
 }
 
-form .button-container button.cancel {
+.main form .button-container button.cancel {
   background-color: #8298bb;
 }
 

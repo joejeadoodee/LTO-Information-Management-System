@@ -1,5 +1,5 @@
-import { updateDriver } from "../services/drivers";
-import { addLicense } from "../services/license";
+import { updateDriver } from "../../services/drivers";
+import { addLicense } from "../../services/license";
 
 function DriverModalEdit({ setShow, data: driver }) {
   const handleDriverSubmit = async (e) => {
