@@ -134,35 +134,93 @@ const deleteDriver = async (req, res) => {
 const getFilteredDrivers = async (req, res) => {
   const { license_type, license_status, sex, age_min, age_max } = req.query;
 
-  let query = `
-    SELECT d.*, l.license_type, l.license_status
+  // Join drivers with corresponding licenses
+  // Get latest license issuance of driver
+  // Join drivers with latest license issuance
+  let filterQuery = `
+    SELECT d.*,
+           l.license_type, l.license_status, l.license_issuance_date
     FROM driver d
-    JOIN license l ON d.driver_id = l.driver_id
-    WHERE 1=1
+    LEFT JOIN license l ON d.driver_id = l.driver_id
+    LEFT JOIN (
+      SELECT driver_id, MAX(license_issuance_date) AS latest_date
+      FROM license
+      GROUP BY driver_id
+    ) latest ON l.driver_id = latest.driver_id
+            AND l.license_issuance_date = latest.latest_date
+    WHERE (l.license_issuance_date = latest.latest_date OR l.driver_id IS NULL)
   `;
+
+  // Apply filters
   const params = [];
 
   if (license_type) {
-    query += " AND l.license_type = ?";
+    filterQuery += " AND l.license_type = ?";
     params.push(license_type);
   }
   if (license_status) {
-    query += " AND l.license_status = ?";
+    filterQuery += " AND l.license_status = ?";
     params.push(license_status);
   }
   if (sex) {
-    query += " AND d.sex = ?";
+    filterQuery += " AND d.sex = ?";
     params.push(sex);
   }
-  if (age_min && age_max) {
-    query +=
-      " AND TIMESTAMPDIFF(YEAR, d.date_of_birth, CURDATE()) BETWEEN ? AND ?";
-    params.push(age_min, age_max);
+  if (age_min) {
+    filterQuery += " AND TIMESTAMPDIFF(YEAR, d.date_of_birth, CURDATE()) >= ?";
+    params.push(age_min);
+  }
+  if (age_max) {
+    filterQuery += " AND TIMESTAMPDIFF(YEAR, d.date_of_birth, CURDATE()) <= ?";
+    params.push(age_max);
   }
 
   try {
-    const [rows] = await pool.query(query, params);
-    res.status(200).json({ success: true, data: rows });
+    const [filteredRows] = await pool.query(filterQuery, params);
+
+    if (filteredRows.length === 0) {
+      return res.status(200).json({ success: true, data: [] });
+    }
+
+    // Get all license issuances for the filtered drivers
+    const driverIds = filteredRows.map((row) => row.driver_id);
+    const [allLicenses] = await pool.query(
+      `SELECT * FROM license 
+       WHERE driver_id IN (?)
+       ORDER BY driver_id, license_issuance_date DESC`,
+      [driverIds],
+    );
+
+    // Map licenses to their drivers
+    const licenseMap = {};
+    allLicenses.forEach((license) => {
+      if (!licenseMap[license.driver_id]) {
+        licenseMap[license.driver_id] = [];
+      }
+      licenseMap[license.driver_id].push(license);
+    });
+
+    const data = filteredRows.map((row) => {
+      const {
+        driver_id,
+        license_number,
+        full_name,
+        date_of_birth,
+        sex,
+        address,
+      } = row;
+      return {
+        driver_id,
+        license_number,
+        full_name,
+        date_of_birth,
+        sex,
+        address,
+        license_issuances: licenseMap[driver_id] || [],
+      };
+    });
+
+    res.status(200).json({ success: true, data });
   } catch (err) {
     res.status(500).json({ success: false, msg: err.message });
   }
