@@ -6,6 +6,7 @@ function ViolationsPage() {
     <>
       <Header />
       <Sidebar page="violations" />
+      <main className="main">{/*WRITE HTML HERE*/}</main>
     </>
   );
 }

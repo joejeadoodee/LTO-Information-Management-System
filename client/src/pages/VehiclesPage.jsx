@@ -6,6 +6,7 @@ function VehiclesPage() {
     <>
       <Header />
       <Sidebar page="vehicles" />
+      <main className="main">{/*WRITE HTML HERE*/}</main>
     </>
   );
 }
