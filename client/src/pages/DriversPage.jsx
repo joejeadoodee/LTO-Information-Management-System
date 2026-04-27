@@ -1,22 +1,22 @@
 import { useEffect, useState } from "react";
-import { getAllDrivers, deleteDriver } from "../services/drivers.js";
+import { getFilteredDrivers, deleteDriver } from "../services/drivers.js";
 import Sidebar from "../components/Sidebar.jsx";
 import Header from "../components/Header.jsx";
-import DriverModalAdd from "../components/DriverModalAdd.jsx";
-import DriverModalEdit from "../components/DriverModalEdit.jsx";
+import DriverModalAdd from "../components/DriverComponents/DriverModalAdd.jsx";
+import DriverModalEdit from "../components/DriverComponents/DriverModalEdit.jsx";
+import DriverFilters from "../components/DriverComponents/DriverFilters.jsx";
 import "../styles/drivers.css";
 
 function DriversPage() {
   // Page/component states initialization
+  const [filter, setFilter] = useState({});
   const [drivers, setDrivers] = useState([]);
   const [showAdd, setShowAdd] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [editContent, setEditContent] = useState({});
 
-  // On page render, getDrivers, then, setDrivers to result data
   useEffect(() => {
-    getAllDrivers().then((data) => setDrivers(data));
-  }, []);
+    getFilteredDrivers(filter).then((data) => setDrivers(data)); }, [filter]);
 
   // Loop through drivers and create a row display for each
   const driversDisplay = drivers.map((driver) => {
@@ -70,7 +70,15 @@ function DriversPage() {
     <>
       <Header />
       <Sidebar page="drivers" />
-      <main>
+      <main className="main">
+        {/* Only render edit modal if showEdit is true*/}
+        {showEdit ? (
+          <DriverModalEdit setShow={setShowEdit} data={editContent} />
+        ) : undefined}
+
+        {/* Only render add modal if showAdd is true*/}
+        {showAdd ? <DriverModalAdd setShow={setShowAdd} /> : undefined}
+
         <button
           className="add-driver button-behave"
           onClick={() => setShowAdd(true)}
@@ -78,13 +86,7 @@ function DriversPage() {
           Add Driver
         </button>
 
-        {/* Only render add modal if showEdit is true*/}
-        {showEdit ? (
-          <DriverModalEdit setShow={setShowEdit} data={editContent} />
-        ) : undefined}
-
-        {/* Only render add modal if showAdd is true*/}
-        {showAdd ? <DriverModalAdd setShow={setShowAdd} /> : undefined}
+        <DriverFilters setFilter={setFilter} />
 
         {/* Only render table if drivers is not empty */}
         {drivers.length > 0 ? (
@@ -103,7 +105,7 @@ function DriversPage() {
             <div className="table content">{driversDisplay}</div>
           </div>
         ) : (
-          <div className="no-results">No drivers yet</div>
+          <div className="no-results">No drivers</div>
         )}
       </main>
     </>

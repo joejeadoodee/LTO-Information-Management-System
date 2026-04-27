@@ -131,15 +131,13 @@ const deleteVehicle = async (req, res) => {
 
 // View all vehicles owned by a given driver
 const getVehiclesByDriver = async (req, res) => {
-  const { full_name } = req.query;
+  const { id } = req.query;
 
-  if (!full_name)
-    return res
-      .status(400)
-      .json({
-        success: false,
-        msg: "Please provide full_name as a query param",
-      });
+  if (!id)
+    return res.status(400).json({
+      success: false,
+      msg: "Please provide id as a query param",
+    });
 
   try {
     const [rows] = await pool.query(
@@ -147,18 +145,16 @@ const getVehiclesByDriver = async (req, res) => {
       SELECT v.*
       FROM vehicle v
       JOIN driver d ON v.driver_id = d.driver_id
-      WHERE d.full_name = ?
+      WHERE d.driver_id = ?
     `,
-      [full_name],
+      [id],
     );
 
     if (rows.length === 0)
-      return res
-        .status(404)
-        .json({
-          success: false,
-          msg: `No vehicles found for driver: ${full_name}`,
-        });
+      return res.status(404).json({
+        success: false,
+        msg: `No vehicles found for driver: ${id}`,
+      });
 
     res.status(200).json({ success: true, data: rows });
   } catch (err) {
@@ -166,16 +162,24 @@ const getVehiclesByDriver = async (req, res) => {
   }
 };
 
-// View all vehicles with expired registrations
 const getVehiclesExpiredRegistration = async (req, res) => {
+  const { date } = req.query;
+
+  if (!date)
+    return res.status(400).json({
+      success: false,
+      msg: "Please provide date as a query param",
+    });
+
   try {
-    const [rows] = await pool.query(`
-      SELECT v.*, vr.expiration_date
-      FROM vehicle v
-      JOIN vehicleRegistration vr ON v.vehicle_id = vr.vehicle_id
-      WHERE vr.expiration_date <= CURDATE()
-        OR vr.registration_status = 'expired'
-    `);
+    const [rows] = await pool.query(
+      `SELECT v.*, vr.*
+       FROM vehicle v
+       JOIN vehicleRegistration vr ON v.vehicle_id = vr.vehicle_id
+       WHERE vr.expiration_date <= ?
+         OR vr.registration_status = 'expired'`,
+      [date],
+    );
     res.status(200).json({ success: true, data: rows });
   } catch (err) {
     res.status(500).json({ success: false, msg: err.message });
@@ -187,12 +191,10 @@ const getVehiclesByViolationLocation = async (req, res) => {
   const { location } = req.query;
 
   if (!location)
-    return res
-      .status(400)
-      .json({
-        success: false,
-        msg: "Please provide location as a query param",
-      });
+    return res.status(400).json({
+      success: false,
+      msg: "Please provide location as a query param",
+    });
 
   try {
     const [rows] = await pool.query(

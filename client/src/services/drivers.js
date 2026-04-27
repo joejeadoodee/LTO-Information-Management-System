@@ -79,4 +79,43 @@ async function updateDriver({ driver_id, ...data }) {
   }
 }
 
-export { getAllDrivers, deleteDriver, addDriver, updateDriver };
+async function getFilteredDrivers({
+  license_type,
+  license_status,
+  sex,
+  age_min,
+  age_max,
+}) {
+  try {
+    const {
+      data: { data },
+    } = await axios.get(
+      `/api/driver/filter?license_type=${license_type ?? ""}&license_status=${license_status ?? ""}&sex=${sex ?? ""}&age_min=${age_min ?? ""}&age_max=${age_max ?? ""}`,
+    );
+
+    // Format the bday of each driver to Date object
+    const fixData = data.map((driver) => ({
+      ...driver,
+      date_of_birth: new Date(driver.date_of_birth),
+
+      // Format the issuance and expiration of each license to Date object
+      license_issuances: driver.license_issuances.map((license) => ({
+        ...license,
+        license_issuance_date: new Date(license.license_issuance_date),
+        license_expiration_date: new Date(license.license_expiration_date),
+      })),
+    }));
+
+    return fixData;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export {
+  getAllDrivers,
+  deleteDriver,
+  addDriver,
+  updateDriver,
+  getFilteredDrivers,
+};

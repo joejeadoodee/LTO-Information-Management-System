@@ -1,4 +1,4 @@
-import { addDriver } from "../services/drivers";
+import { addDriver } from "../../services/drivers";
 
 function DriverModalAdd({ setShow }) {
   const handleSubmit = async (e) => {
@@ -61,6 +61,7 @@ function DriverModalAdd({ setShow }) {
               type="date"
               name="license_issuance_date"
               id="license_issuance_date"
+              defaultValue={new Date().toISOString().split("T")[0]}
               required
             />
           </div>
