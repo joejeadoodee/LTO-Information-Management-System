@@ -112,10 +112,52 @@ async function getFilteredDrivers({
   }
 }
 
+async function getExpiredOrSuspendedDrivers() {
+  try {
+    const {
+      data: { data },
+    } = await axios.get(`/api/driver/expired-suspended`);
+
+    // Format the bday, issuance, and expiration of each driver to Date object
+    const fixData = data.map((driver) => ({
+      ...driver,
+      date_of_birth: new Date(driver.date_of_birth),
+      license_issuance_date: new Date(driver.license_issuance_date),
+      license_expiration_date: new Date(driver.license_expiration_date),
+    }));
+
+    return fixData;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+async function getDriverViolations({ id, date_from, date_to }) {
+  try {
+    const {
+      data: { data },
+    } = await axios.get(
+      `/api/driver/${id}/violations?date_from=${date_from}&date_to=${date_to}`,
+    );
+
+    const fixData = data.map((violation) => ({
+      ...violation,
+      date_of_birth: new Date(violation.date_of_birth),
+      violation_date_time: new Date(violation.violation_date_time),
+    }));
+
+    return fixData;
+  } catch (error) {
+    console.log(error);
+    return [];
+  }
+}
 export {
   getAllDrivers,
   deleteDriver,
   addDriver,
   updateDriver,
   getFilteredDrivers,
+  getExpiredOrSuspendedDrivers,
+  getDriverViolations,
 };

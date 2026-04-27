@@ -6,6 +6,7 @@ function RegistrationPage() {
     <>
       <Header />
       <Sidebar page="registrations" />
+      <main className="main">{/*WRITE HTML HERE*/}</main>
     </>
   );
 }
