@@ -1,5 +1,6 @@
 import { updateDriver } from "../../services/drivers";
 import { addLicense } from "../../services/license";
+import LicenseRow from "./LicenseRow";
 
 function DriverModalEdit({ setShow, data: driver }) {
   const handleDriverSubmit = async (e) => {
@@ -32,16 +33,7 @@ function DriverModalEdit({ setShow, data: driver }) {
 
   // Loop through driver licenses and create a row for each
   const issuances = driver.license_issuances.map((issuance) => (
-    <>
-      <div className="item">
-        {issuance.license_issuance_date.toDateString().slice(4)}
-      </div>
-      <div className="item">
-        {issuance.license_expiration_date.toDateString().slice(4)}
-      </div>
-      <div className="item">{issuance.license_status}</div>
-      <div className="item">{issuance.license_type}</div>
-    </>
+    <LicenseRow issuance={issuance} driverId={driver.driver_id} />
   ));
 
   return (
@@ -100,19 +92,21 @@ function DriverModalEdit({ setShow, data: driver }) {
           </div>
         </form>
 
+        <div>
+          <h3>LICENSE ISSUANCES</h3>
+        </div>
+        <div className="license-grid">
+          <div className="license-grid header">
+            <div className="item">Issuance Date</div>
+            <div className="item">Expiration Date</div>
+            <div className="item">Status</div>
+            <div className="item">Type</div>
+            <div className="item">Actions</div>
+          </div>
+          {issuances}
+        </div>
+
         <form onSubmit={handleLicenseSubmit}>
-          <div>
-            <h3>LICENSE ISSUANCES</h3>
-          </div>
-          <div className="license-grid">
-            <div className="license-grid header">
-              <div className="item">Issuance Date</div>
-              <div className="item">Expiration Date</div>
-              <div className="item">Status</div>
-              <div className="item">Type</div>
-            </div>
-            <div className="license-grid content">{issuances}</div>
-          </div>
           <div>
             <label htmlFor="license_issuance_date">License Issuance Date</label>
             <input

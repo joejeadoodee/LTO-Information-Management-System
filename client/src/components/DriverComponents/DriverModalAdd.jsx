@@ -65,6 +65,7 @@ function DriverModalAdd({ setShow }) {
               required
             />
           </div>
+
           <div>
             <label htmlFor="license_expiration_date">
               License Expiration Date
