@@ -153,3 +153,117 @@
   font-size: 25px;
   color: #4a5769;
 }
+
+.reg-add-form-overlay {
+  position: fixed !important;
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100dvw !important;
+  height: 100dvh !important;
+  z-index: 999 !important;
+}
+
+.reg-add-form-overlay > .reg-modal-wrapper-box {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important; 
+  background-color: white !important;
+  width: 700px !important;
+  
+  height: auto !important; 
+  
+  max-height: 90dvh !important; 
+  
+  padding: 30px !important;
+  overflow-y: auto !important;
+  box-sizing: border-box !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+.reg-modal-wrapper-box form {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+}
+
+.reg-modal-wrapper-box form h3 {
+  font-weight: 300 !important;
+  font-size: 20px !important;
+  margin-top: 20px !important;
+  margin-bottom: 15px !important;
+  color: #000000 !important;
+  letter-spacing: 0.5px !important;
+}
+
+.reg-modal-wrapper-box form > .reg-form-field-group {
+  display: flex !important;
+  flex-direction: column !important;
+  margin-bottom: 15px !important;
+  width: 100% !important;
+}
+
+.reg-modal-wrapper-box form > .reg-form-field-group label {
+  font-size: 14px !important;
+  color: #333333 !important;
+  margin-bottom: 5px !important;
+  font-weight: normal !important;
+}
+
+.reg-modal-wrapper-box form > .reg-form-field-group input,
+.reg-modal-wrapper-box form > .reg-form-field-group select {
+  background-color: #ededee !important; 
+  padding: 5px 20px 5px 20px !important;  
+  border-radius: 30px !important;        
+  border: none !important;
+  outline: none !important;
+  font-size: 14px !important;
+  color: #000000 !important;
+  height: 32px !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+}
+
+.reg-modal-wrapper-box form > .reg-form-field-group select {
+  appearance: auto !important;
+}
+
+.reg-modal-wrapper-box .reg-modal-button-container {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 10px !important;
+  justify-content: flex-end !important;
+  margin-top: 25px !important;
+  margin-bottom: 15px !important;
+}
+
+.reg-modal-button-container button {
+  color: white !important;
+  padding: 5px 15px !important;
+  border-radius: 10px !important; 
+  font-size: 14px !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: all 200ms !important;
+  height: 32px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.reg-modal-button-container button.reg-save {
+  background-color: #3f5f92 !important; 
+}
+
+.reg-modal-button-container button.reg-cancel {
+  background-color: #8298bb !important; 
+}
+
+.reg-modal-button-container button:hover {
+  transform: scale(1.05) !important;
+}
+
+.reg-modal-button-container button:active {
+  transform: scale(0.95) !important;
+}
