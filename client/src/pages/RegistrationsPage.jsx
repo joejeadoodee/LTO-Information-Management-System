@@ -47,11 +47,13 @@ function RegistrationsPage() {
           Add Registration
         </button>
 
-        <RegistrationFilters setFilter={setFilter} />
+        {/* FIXED: Wrapped the filter row component with an explicit inline style 
+            container to force everything inside to stay pinned to the left edge */}
+        <div style={{ display: "flex", width: "100%", justifyContent: "flex-start" }}>
+          <RegistrationFilters setFilter={setFilter} />
+        </div>
 
         {registrations.length > 0 ? (
-          /* FIXED: Removed the .reg-table-container wrapper element completely! 
-             The table divs now sit directly under <main className="main"> exactly like DriversPage */
           <>
             <div className="table header reg-7-col">
               <div className="item">PLATE NO</div>
