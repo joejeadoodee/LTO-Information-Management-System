@@ -8,8 +8,8 @@ async function getVehiclesExpiredRegistration({ date }) {
 
     const formatted = data.map((reg) => ({
       ...reg,
-      registration_date: new Date(reg.registration_date),
-      expiration_date: new Date(reg.expiration_date),
+      registration_date: new Date(reg.registration_date), 
+      expiration_date: new Date(reg.expiration_date),     
     }));
 
     return formatted;

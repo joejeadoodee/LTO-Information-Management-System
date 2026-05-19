@@ -10,54 +10,123 @@ function RegistrationModalEdit({ setShow, data: reg }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const currentFields = Object.fromEntries(new FormData(e.target));
-    await updateRegistration({ ...currentFields, vehicle_reg_id: reg.vehicle_reg_id });
+    const formData = new FormData(e.target);
+    const currentFields = Object.fromEntries(formData);
+    
+    // Explicitly binding the precise data shape your backend needs
+    await updateRegistration({ 
+      ...currentFields, 
+      vehicle_reg_id: reg.vehicle_reg_id 
+    });
     setShow(false);
     window.location.reload();
   };
 
+  const safeFormatDate = (dateVal) => {
+    if (!dateVal) return "";
+    try {
+      if (dateVal instanceof Date) {
+        if (isNaN(dateVal.getTime())) return ""; 
+        
+        const year = dateVal.getFullYear();
+        const month = String(dateVal.getMonth() + 1).padStart(2, '0'); 
+        const day = String(dateVal.getDate()).padStart(2, '0');
+        
+        return `${year}-${month}-${day}`;
+      }
+      
+      // Fallback if it's passed down as a string
+      const dateStr = String(dateVal);
+      if (dateStr.includes("T")) {
+        return dateStr.split("T")[0];
+      }
+      return dateStr.slice(0, 10);
+    } catch (err) {
+      console.error("Error formatting date:", err);
+      return "";
+    }
+  };
+
   return (
-    <div className="modal-backdrop" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.3)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
-      <div className="add-form-container" style={{ background: '#fff', padding: '25px', borderRadius: '8px', width: '450px', maxHeight: '90vh', overflowY: 'auto' }}>
+    <div className="reg-add-form-overlay">
+      <div className="reg-modal-wrapper-box">
         <form onSubmit={handleSubmit}>
-          <h3>REGISTRATION DETAILS</h3>
+          <div>
+            <h3>REGISTRATION DETAILS</h3>
+          </div>
           
-          <div style={{ marginBottom: "12px" }}>
-            <label>Registration Number</label>
-            <input type="text" name="registration_no" defaultValue={reg.registration_no} maxLength="9" required />
+          <div className="reg-form-field-group">
+            <label>Plate Number</label>
+            <div className="reg-static-text-display">
+              {reg.plate_no || "N/A"}
+            </div>
           </div>
 
-          <div style={{ marginBottom: "12px" }}>
-            <label>Associated Vehicle</label>
-            <select name="vehicle_id" defaultValue={reg.vehicle_id} required>
+          <div className="reg-form-field-group">
+            <label htmlFor="vehicle_id">Associated Vehicle</label>
+            <select name="vehicle_id" id="vehicle_id" defaultValue={reg.vehicle_id} required>
               {vehicles.map(v => (
-                <option key={v.vehicle_id} value={v.vehicle_id}>{v.plate_no} - {v.make} {v.model}</option>
+                <option key={v.vehicle_id} value={v.vehicle_id}>
+                  {v.plate_no} - {v.make || v.manufacturer} {v.model}
+                </option>
               ))}
             </select>
           </div>
 
-          <div style={{ marginBottom: "12px" }}>
-            <label>Registration Date</label>
-            <input type="date" name="registration_date" defaultValue={reg.registration_date ? reg.registration_date.split("T")[0] : ""} required />
+          <div className="reg-form-field-group">
+            <label htmlFor="color">Color</label>
+            <input 
+              type="text" 
+              name="color" 
+              id="color" 
+              defaultValue={reg.color || ""} 
+              required 
+            />
           </div>
 
-          <div style={{ marginBottom: "12px" }}>
-            <label>Expiration Date</label>
-            <input type="date" name="expiration_date" defaultValue={reg.expiration_date ? reg.expiration_date.split("T")[0] : ""} required />
+          <div className="reg-form-field-group">
+            <label htmlFor="registration_date">Registration Date</label>
+            <input 
+              type="date" 
+              name="registration_date" 
+              id="registration_date"
+              defaultValue={safeFormatDate(reg.registration_date)} 
+              required 
+            />
           </div>
 
-          <div style={{ marginBottom: "15px" }}>
-            <label>Registration Status</label>
-            <select name="registration_status" defaultValue={reg.registration_status}>
-              <option value="active">Active</option>
-              <option value="expired">Expired</option>
-              <option value="suspended">Suspended</option>
+          <div className="reg-form-field-group">
+            <label htmlFor="expiration_date">Expiration Date</label>
+            <input 
+              type="date" 
+              name="expiration_date" 
+              id="expiration_date"
+              defaultValue={safeFormatDate(reg.expiration_date)} 
+              required 
+            />
+          </div>
+
+          <div className="reg-form-field-group">
+            <label htmlFor="registration_status">Registration Status</label>
+            {/* Standardizing capitalization parameters ("Active") to align with your option blocks */}
+            <select name="registration_status" id="registration_status" defaultValue={reg.registration_status}>
+              <option value="Active">Active</option>
+              <option value="Expired">Expired</option>
+              <option value="Suspended">Suspended</option>
             </select>
           </div>
 
-          <div className="button-container" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-            <button type="button" className="cancel button-behave" onClick={() => setShow(false)}>Cancel</button>
-            <button type="submit" className="save button-behave">Edit Registration</button>
+          <div className="reg-modal-button-container">
+            <button 
+              type="button" 
+              className="reg-cancel" 
+              onClick={() => setShow(false)}
+            >
+              Cancel
+            </button>
+            <button type="submit" className="reg-save">
+              Edit Registration
+            </button>
           </div>
         </form>
       </div>
