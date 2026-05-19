@@ -21,21 +21,16 @@ function RegistrationFilters({ setFilter }) {
   };
 
   return (
-    <form
-      ref={formRef}
-      className="registration-filter-form"
-      onSubmit={handleSubmit}
-    >
-      <div className="filter-group">
-        <select name="registration_status" id="registration_status" defaultValue="">
-          <option value="">All Registrations</option>
-          <option value="active">Active</option>
-          <option value="expired">Expired</option>
-          <option value="suspended">Suspended</option>
-        </select>
-      </div>
+    <form ref={formRef} onSubmit={handleSubmit} className="reg-filter-form-row">
+      <select name="registration_status" id="registration_status" defaultValue="">
+        <option value="">All Registrations</option>
+        <option value="active">Active</option>
+        <option value="expired">Expired</option>
+        <option value="suspended">Suspended</option>
+      </select>
 
-      <div className="filter-group">
+      {/* MATCHED: Mimics the exact alignment sub-wrapper model as drivers page flex components */}
+      <div className="reg-filter-date-group">
         <label htmlFor="date">As of Date</label>
         <input
           type="date"
@@ -45,15 +40,11 @@ function RegistrationFilters({ setFilter }) {
         />
       </div>
 
-      <button className="apply-filters-btn button-behave" type="submit">
+      <button className="apply-filters-btn" type="submit">
         Apply Filters
       </button>
       
-      <button
-        className="clear-filters-btn button-behave"
-        type="button"
-        onClick={handleClearFilters}
-      >
+      <button className="clear-filters-btn" type="button" onClick={handleClearFilters}>
         Clear
       </button>
     </form>

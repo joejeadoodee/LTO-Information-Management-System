@@ -33,7 +33,7 @@ function RegistrationsPage() {
     <>
       <Header />
       <Sidebar page="registrations" />
-      <main className="main">
+      <main className="reg-main-container">
         {showEdit ? (
           <RegistrationModalEdit setShow={setShowEdit} data={editContent} />
         ) : undefined}
@@ -41,48 +41,44 @@ function RegistrationsPage() {
         {showAdd ? <RegistrationModalAdd setShow={setShowAdd} /> : undefined}
 
         <button
-          className="add-driver button-behave"
+          className="reg-add-action-btn reg-btn-behavior"
           onClick={() => setShowAdd(true)}
         >
           Add Registration
         </button>
 
-        {/* FIXED: Wrapped the filter row component with an explicit inline style 
-            container to force everything inside to stay pinned to the left edge */}
-        <div style={{ display: "flex", width: "100%", justifyContent: "flex-start" }}>
-          <RegistrationFilters setFilter={setFilter} />
-        </div>
+        <RegistrationFilters setFilter={setFilter} />
 
         {registrations.length > 0 ? (
           <>
-            <div className="table header reg-7-col">
-              <div className="item">PLATE NO</div>
-              <div className="item">MANUFACTURER</div>
-              <div className="item">MODEL</div>
-              <div className="item">TYPE</div>
-              <div className="item">COLOR</div>
-              <div className="item">EXPIRATION DATE</div>
-              <div className="item">ACTION</div>
+            <div className="reg-table reg-table-header">
+              <div className="reg-item">PLATE NO</div>
+              <div className="reg-item">MANUFACTURER</div>
+              <div className="reg-item">MODEL</div>
+              <div className="reg-item">TYPE</div>
+              <div className="reg-item">COLOR</div>
+              <div className="reg-item">EXPIRATION DATE</div>
+              <div className="reg-item">ACTION</div>
             </div>
             
-            <div className="table content reg-7-col">
+            <div className="reg-table reg-table-content">
               {registrations.map((reg, index) => {
                 const rowId = reg.vehicle_reg_id || index;
                 return (
                   <div key={`reg-row-${rowId}`} style={{ display: "contents" }}>
-                    <div className="item">{reg.plate_no || "N/A"}</div>
-                    <div className="item">{reg.make || "N/A"}</div>
-                    <div className="item">{reg.model || "N/A"}</div>
-                    <div className="item">{reg.vehicle_type || "N/A"}</div>
-                    <div className="item">{reg.color || "N/A"}</div>
-                    <div className="item">
+                    <div className="reg-item">{reg.plate_no || "N/A"}</div>
+                    <div className="reg-item">{reg.make || "N/A"}</div>
+                    <div className="reg-item">{reg.model || "N/A"}</div>
+                    <div className="reg-item">{reg.vehicle_type || "N/A"}</div>
+                    <div className="reg-item">{reg.color || "N/A"}</div>
+                    <div className="reg-item">
                       {reg.expiration_date && typeof reg.expiration_date.toDateString === "function"
                         ? reg.expiration_date.toDateString().slice(4)
                         : String(reg.expiration_date || "No Date")}
                     </div>
-                    <div className="item">
+                    <div className="reg-item">
                       <button
-                        className="button-behave view"
+                        className="reg-btn-behavior reg-view-btn"
                         onClick={() => {
                           setEditContent(reg);
                           setShowEdit(true);
@@ -91,7 +87,7 @@ function RegistrationsPage() {
                         View
                       </button>
                       <button
-                        className="button-behave delete"
+                        className="reg-btn-behavior reg-delete-btn"
                         onClick={async () => {
                           if (window.confirm("Delete this vehicle registration record?")) {
                             const deleteId = reg.vehicle_reg_id;
@@ -109,7 +105,7 @@ function RegistrationsPage() {
             </div>
           </>
         ) : (
-          <div className="no-results">No vehicle registrations found</div>
+          <div className="reg-no-results">No vehicle registrations found</div>
         )}
       </main>
     </>
