@@ -2,7 +2,7 @@ import pool from "../db/database.js";
 
 const getAllViolations = async (req, res) => {
   try {
-    const [rows] = await pool.query("SELECT * FROM traffic_violation");
+    const [rows] = await pool.query("SELECT tv.*, d.full_name, v.plate_no FROM traffic_violation tv JOIN driver d ON tv.driver_id = d.driver_id LEFT JOIN vehicle v ON tv.vehicle_id = v.vehicle_id ORDER BY tv.violation_date_time DESC;");
     res.status(200).json({ success: true, data: rows });
   } catch (err) {
     res.status(500).json({ success: false, msg: err.message });
