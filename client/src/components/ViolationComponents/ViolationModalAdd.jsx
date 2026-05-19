@@ -54,9 +54,9 @@ function ViolationModalAdd({ setShow }) {
           <div>
             <label>Status</label>
             <select name="violation_status">
-              <option value="Pending">Pending</option>
-              <option value="Paid">Paid</option>
-              <option value="Unpaid">Unpaid</option>
+              <option value="pending">Pending</option>
+              <option value="paid">Paid</option>
+              <option value="unpaid">Unpaid</option>
             </select>
           </div>
 

@@ -24,6 +24,12 @@ function ViolationModalEdit({ setShow, data: violation }) {
     window.location.reload();
   };
 
+  const toLocalDatetimeInput = (date) => {
+    const d = date instanceof Date ? date : new Date(date);
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+
   return (
     <div className="add-form-container">
       <div>
@@ -53,13 +59,7 @@ function ViolationModalEdit({ setShow, data: violation }) {
             <input
               type="datetime-local"
               name="violation_date_time"
-              defaultValue={
-                violation.violation_date_time
-                  ? new Date(violation.violation_date_time)
-                      .toISOString()
-                      .slice(0, 16)
-                  : ""
-              }
+              defaultValue={toLocalDatetimeInput(violation.violation_date_time)}
               required
             />
           </div>
@@ -90,9 +90,9 @@ function ViolationModalEdit({ setShow, data: violation }) {
               name="violation_status"
               defaultValue={violation.violation_status}
             >
-              <option value="Pending">Pending</option>
-              <option value="Paid">Paid</option>
-              <option value="Unpaid">Unpaid</option>
+              <option value="pending">Pending</option>
+              <option value="paid">Paid</option>
+              <option value="unpaid">Unpaid</option>
             </select>
           </div>
 
