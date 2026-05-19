@@ -3,20 +3,31 @@ import { getAllVehicles, updateRegistration } from "../../services/registration"
 
 function RegistrationModalEdit({ setShow, data: reg }) {
   const [vehicles, setVehicles] = useState([]);
+  const [currentColor, setCurrentColor] = useState(reg.color || "");
 
   useEffect(() => {
     getAllVehicles().then((data) => setVehicles(data || []));
   }, []);
+
+  const handleVehicleChange = (e) => {
+    const vehicleId = e.target.value;
+    const matchingVehicle = vehicles.find(
+      (v) => String(v.id || v.vehicle_id) === String(vehicleId)
+    );
+    if (matchingVehicle) {
+      setCurrentColor(matchingVehicle.color || "");
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const currentFields = Object.fromEntries(formData);
     
-    // Explicitly binding the precise data shape your backend needs
     await updateRegistration({ 
       ...currentFields, 
-      vehicle_reg_id: reg.vehicle_reg_id 
+      vehicle_reg_id: reg.vehicle_reg_id,
+      registration_no: reg.registration_no 
     });
     setShow(false);
     window.location.reload();
@@ -27,24 +38,15 @@ function RegistrationModalEdit({ setShow, data: reg }) {
     try {
       if (dateVal instanceof Date) {
         if (isNaN(dateVal.getTime())) return ""; 
-        
         const year = dateVal.getFullYear();
         const month = String(dateVal.getMonth() + 1).padStart(2, '0'); 
         const day = String(dateVal.getDate()).padStart(2, '0');
-        
         return `${year}-${month}-${day}`;
       }
-      
-      // Fallback if it's passed down as a string
       const dateStr = String(dateVal);
-      if (dateStr.includes("T")) {
-        return dateStr.split("T")[0];
-      }
+      if (dateStr.includes("T")) return dateStr.split("T")[0];
       return dateStr.slice(0, 10);
-    } catch (err) {
-      console.error("Error formatting date:", err);
-      return "";
-    }
+    } catch { return ""; }
   };
 
   return (
@@ -64,9 +66,15 @@ function RegistrationModalEdit({ setShow, data: reg }) {
 
           <div className="reg-form-field-group">
             <label htmlFor="vehicle_id">Associated Vehicle</label>
-            <select name="vehicle_id" id="vehicle_id" defaultValue={reg.vehicle_id} required>
+            <select 
+              name="vehicle_id" 
+              id="vehicle_id" 
+              defaultValue={reg.vehicle_id} 
+              onChange={handleVehicleChange} 
+              required
+            >
               {vehicles.map(v => (
-                <option key={v.vehicle_id} value={v.vehicle_id}>
+                <option key={v.id || v.vehicle_id} value={v.id || v.vehicle_id}>
                   {v.plate_no} - {v.make || v.manufacturer} {v.model}
                 </option>
               ))}
@@ -79,7 +87,8 @@ function RegistrationModalEdit({ setShow, data: reg }) {
               type="text" 
               name="color" 
               id="color" 
-              defaultValue={reg.color || ""} 
+              value={currentColor} 
+              onChange={(e) => setCurrentColor(e.target.value)}
               required 
             />
           </div>
@@ -108,7 +117,6 @@ function RegistrationModalEdit({ setShow, data: reg }) {
 
           <div className="reg-form-field-group">
             <label htmlFor="registration_status">Registration Status</label>
-            {/* Standardizing capitalization parameters ("Active") to align with your option blocks */}
             <select name="registration_status" id="registration_status" defaultValue={reg.registration_status}>
               <option value="Active">Active</option>
               <option value="Expired">Expired</option>
@@ -117,16 +125,8 @@ function RegistrationModalEdit({ setShow, data: reg }) {
           </div>
 
           <div className="reg-modal-button-container">
-            <button 
-              type="button" 
-              className="reg-cancel" 
-              onClick={() => setShow(false)}
-            >
-              Cancel
-            </button>
-            <button type="submit" className="reg-save">
-              Edit Registration
-            </button>
+            <button type="button" className="reg-cancel" onClick={() => setShow(false)}>Cancel</button>
+            <button type="submit" className="reg-save">Edit Registration</button>
           </div>
         </form>
       </div>

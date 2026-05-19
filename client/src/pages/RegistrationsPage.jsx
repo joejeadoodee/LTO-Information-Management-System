@@ -8,14 +8,29 @@ import RegistrationFilters from "../components/RegistrationComponents/Registrati
 import "../styles/registration.css"; 
 
 function RegistrationsPage() {
-  const [filter, setFilter] = useState({ date: new Date().toISOString().split("T")[0], registration_status: "" });
+  // Helper to generate local "YYYY-MM-DD" safely to resolve timezone shifts
+  const getLocalTodayString = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  // State initialized to a safe local date string to satisfy the backend's validation rules
+  const [filter, setFilter] = useState({ 
+    date: getLocalTodayString(), 
+    registration_status: "" 
+  });
+  
   const [registrations, setRegistrations] = useState([]);
   const [showAdd, setShowAdd] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [editContent, setEditContent] = useState(null);
 
   useEffect(() => {
-    const targetDate = filter.date || new Date().toISOString().split("T")[0];
+    // FIX: Guarantees a valid, non-empty date parameter string is ALWAYS dispatched
+    const targetDate = filter.date || getLocalTodayString();
 
     getVehiclesExpiredRegistration({ date: targetDate }).then((data) => {
       let processData = Array.isArray(data) ? data : [];

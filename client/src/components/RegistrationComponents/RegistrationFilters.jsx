@@ -3,11 +3,10 @@ import { useRef } from "react";
 function RegistrationFilters({ setFilter }) {
   const formRef = useRef(null);
 
-  // Helper to generate today's date based on local calendar timezone boundaries
   const getLocalTodayString = () => {
     const today = new Date();
     const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+    const month = String(today.getMonth() + 1).padStart(2, '0');
     const day = String(today.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   };
@@ -25,17 +24,13 @@ function RegistrationFilters({ setFilter }) {
     }
     setFilter({
       registration_status: "",
-      date: getLocalTodayString() 
+      date: "" // Keeps target open to fetch all logs dynamically
     });
   };
 
   return (
     <form ref={formRef} onSubmit={handleSubmit} className="reg-filter-form-row">
-      <select 
-        name="registration_status" 
-        id="registration_status" 
-        defaultValue=""
-      >
+      <select name="registration_status" id="registration_status" defaultValue="">
         <option value="">All Registrations</option>
         <option value="active">Active</option>
         <option value="expired">Expired</option>
@@ -48,17 +43,12 @@ function RegistrationFilters({ setFilter }) {
           type="date"
           name="date"
           id="date"
-          defaultValue={getLocalTodayString()} // FIXED: Now initializes to actual local today
+          defaultValue={getLocalTodayString()} 
         />
       </div>
 
-      <button className="apply-filters-btn" type="submit">
-        Apply Filters
-      </button>
-      
-      <button className="clear-filters-btn" type="button" onClick={handleClearFilters}>
-        Clear
-      </button>
+      <button className="apply-filters-btn" type="submit">Apply Filters</button>
+      <button className="clear-filters-btn" type="button" onClick={handleClearFilters}>Clear</button>
     </form>
   );
 }

@@ -52,13 +52,10 @@ function RegistrationModalAdd({ setShow }) {
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData);
     
-    // FIX 1: Explicitly generate a registration number string to satisfy your SQL server validation
+    // Auto-generates registration_no to pass backend strict controller requirements
     if (!data.registration_no) {
       data.registration_no = "REG-" + Math.floor(100000 + Math.random() * 900000);
     }
-
-    // Optional debug log: Check your browser inspect console when saving to see the payload details!
-    console.log("Submitting payload to backend database:", data);
 
     await addRegistration(data);
     setShow(false); 
@@ -75,7 +72,6 @@ function RegistrationModalAdd({ setShow }) {
           
           <div className="reg-form-field-group">
             <label htmlFor="vehicle_id">Select Vehicle</label>
-            {/* FIX 2: Explicitly naming it 'vehicle_id' maps it perfectly to your SQL parameters */}
             <select 
               name="vehicle_id" 
               id="vehicle_id" 
