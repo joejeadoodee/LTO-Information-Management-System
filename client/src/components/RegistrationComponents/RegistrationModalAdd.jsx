@@ -1,23 +1,68 @@
-import { addRegistration } from "../../services/registration";
+import { useEffect, useState } from "react";
+import { getAllVehicles, addRegistration } from "../../services/registration";
 
 function RegistrationModalAdd({ setShow }) {
+  const [vehicles, setVehicles] = useState([]);
+  const [selectedColor, setSelectedColor] = useState("");
+  const [regDate, setRegDate] = useState("");
+  const [expDate, setExpDate] = useState("");
+
+  const formatDateToString = (dateObj) => {
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  // 1. Fetch dynamic vehicles from SQL on mount & initialize dates
+  useEffect(() => {
+    const today = new Date();
+    const nextYear = new Date();
+    nextYear.setFullYear(today.getFullYear() + 1);
+
+    setRegDate(formatDateToString(today));
+    setExpDate(formatDateToString(nextYear));
+
+    getAllVehicles().then((data) => setVehicles(data || []));
+  }, []);
+
+  // 2. Auto-fill color when a vehicle is selected from the dropdown
+  const handleVehicleChange = (e) => {
+    const vehicleId = e.target.value;
+    const matchingVehicle = vehicles.find(
+      (v) => String(v.id || v.vehicle_id) === String(vehicleId)
+    );
+    if (matchingVehicle) {
+      setSelectedColor(matchingVehicle.color || "");
+    }
+  };
+
+  // 3. Auto-calculate expiration date (+1 year) when registration date changes
+  const handleDateChange = (e) => {
+    const newRegDateStr = e.target.value;
+    setRegDate(newRegDateStr);
+
+    if (newRegDateStr) {
+      const currentRegDate = new Date(newRegDateStr);
+      currentRegDate.setFullYear(currentRegDate.getFullYear() + 1);
+      setExpDate(formatDateToString(currentRegDate));
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData);
+    
+    // CRITICAL: Satisfies your backend controller's strict verification rule
+    if (!data.registration_no) {
+      data.registration_no = "REG-" + Math.floor(100000 + Math.random() * 900000);
+    }
+
     await addRegistration(data);
     setShow(false); 
     window.location.reload(); 
-  };
-
-  // FIXED: Generates today's date using local calendar boundaries instead of UTC
-  const getLocalTodayString = () => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
-    const day = String(today.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
   };
 
   return (
@@ -30,12 +75,22 @@ function RegistrationModalAdd({ setShow }) {
           
           <div className="reg-form-field-group">
             <label htmlFor="vehicle_id">Select Vehicle</label>
-            <select name="vehicle_id" id="vehicle_id" required>
-              <option value="" disabled selected hidden>
+            <select 
+              name="vehicle_id" 
+              id="vehicle_id" 
+              required 
+              defaultValue="" 
+              onChange={handleVehicleChange}
+            >
+              <option value="" disabled hidden>
                 Choose a vehicle...
               </option>
-              <option value="1">Toyota Vios (JVA1206)</option>
-              <option value="2">Mitsubishi Xpander (JCC1206)</option>
+              {/* DYNAMIC: Populates option items directly from your SQL vehicle table rows */}
+              {vehicles.map((v) => (
+                <option key={v.id || v.vehicle_id} value={v.id || v.vehicle_id}>
+                  {v.plate_no} - {v.model || v.vehicle_type}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -45,7 +100,9 @@ function RegistrationModalAdd({ setShow }) {
               type="text" 
               name="color" 
               id="color" 
-              placeholder="e.g., Gold, Quartz White Pearl"
+              value={selectedColor}
+              onChange={(e) => setSelectedColor(e.target.value)}
+              placeholder="Auto-fills on selection"
               required 
             />
           </div>
@@ -56,7 +113,8 @@ function RegistrationModalAdd({ setShow }) {
               type="date"
               name="registration_date"
               id="registration_date"
-              defaultValue={getLocalTodayString()} /* FIXED: Now tracks local time correctly */
+              value={regDate}
+              onChange={handleDateChange}
               required
             />
           </div>
@@ -67,6 +125,8 @@ function RegistrationModalAdd({ setShow }) {
               type="date"
               name="expiration_date"
               id="expiration_date"
+              value={expDate}
+              onChange={(e) => setExpDate(e.target.value)}
               required
             />
           </div>
@@ -84,9 +144,7 @@ function RegistrationModalAdd({ setShow }) {
             <button
               className="reg-cancel"
               type="button"
-              onClick={() => {
-                setShow(false);
-              }}
+              onClick={() => setShow(false)}
             >
               Cancel
             </button>
