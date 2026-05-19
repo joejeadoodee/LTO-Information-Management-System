@@ -14,7 +14,6 @@ function RegistrationModalAdd({ setShow }) {
     return `${year}-${month}-${day}`;
   };
 
-  // 1. Fetch dynamic vehicles from SQL on mount & initialize dates
   useEffect(() => {
     const today = new Date();
     const nextYear = new Date();
@@ -26,7 +25,6 @@ function RegistrationModalAdd({ setShow }) {
     getAllVehicles().then((data) => setVehicles(data || []));
   }, []);
 
-  // 2. Auto-fill color when a vehicle is selected from the dropdown
   const handleVehicleChange = (e) => {
     const vehicleId = e.target.value;
     const matchingVehicle = vehicles.find(
@@ -37,7 +35,6 @@ function RegistrationModalAdd({ setShow }) {
     }
   };
 
-  // 3. Auto-calculate expiration date (+1 year) when registration date changes
   const handleDateChange = (e) => {
     const newRegDateStr = e.target.value;
     setRegDate(newRegDateStr);
@@ -55,10 +52,13 @@ function RegistrationModalAdd({ setShow }) {
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData);
     
-    // CRITICAL: Satisfies your backend controller's strict verification rule
+    // FIX 1: Explicitly generate a registration number string to satisfy your SQL server validation
     if (!data.registration_no) {
       data.registration_no = "REG-" + Math.floor(100000 + Math.random() * 900000);
     }
+
+    // Optional debug log: Check your browser inspect console when saving to see the payload details!
+    console.log("Submitting payload to backend database:", data);
 
     await addRegistration(data);
     setShow(false); 
@@ -75,6 +75,7 @@ function RegistrationModalAdd({ setShow }) {
           
           <div className="reg-form-field-group">
             <label htmlFor="vehicle_id">Select Vehicle</label>
+            {/* FIX 2: Explicitly naming it 'vehicle_id' maps it perfectly to your SQL parameters */}
             <select 
               name="vehicle_id" 
               id="vehicle_id" 
@@ -85,10 +86,9 @@ function RegistrationModalAdd({ setShow }) {
               <option value="" disabled hidden>
                 Choose a vehicle...
               </option>
-              {/* DYNAMIC: Populates option items directly from your SQL vehicle table rows */}
               {vehicles.map((v) => (
                 <option key={v.id || v.vehicle_id} value={v.id || v.vehicle_id}>
-                  {v.plate_no} - {v.model || v.vehicle_type}
+                  {v.plate_no} - {v.model || "Vehicle Entry"}
                 </option>
               ))}
             </select>
