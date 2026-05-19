@@ -1,5 +1,42 @@
 import axios from "axios";
 
+async function getAllVehicles() {
+  try {
+    const {
+      data: { data },
+    } = await axios.get("/api/vehicle");
+
+    return data;
+  } catch (error) {
+    console.log(error);
+    return [];
+  }
+}
+
+async function addVehicle(data) {
+  try {
+    await axios.post("/api/vehicle", data);
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+async function updateVehicle({ vehicle_id, ...data }) {
+  try {
+    await axios.put(`/api/vehicle/${vehicle_id}`, data);
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+async function deleteVehicle(id) {
+  try {
+    await axios.delete(`/api/vehicle/${id}`);
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 async function getVehiclesByDriver({ id }) {
   try {
     const {
@@ -33,4 +70,11 @@ async function getVehiclesByViolationLocation({ location }) {
   }
 }
 
-export { getVehiclesByDriver, getVehiclesByViolationLocation };
+export {
+  getAllVehicles,
+  addVehicle,
+  updateVehicle,
+  deleteVehicle,
+  getVehiclesByDriver,
+  getVehiclesByViolationLocation,
+};
