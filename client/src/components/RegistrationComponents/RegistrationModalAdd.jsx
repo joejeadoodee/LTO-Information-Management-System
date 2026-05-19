@@ -1,36 +1,23 @@
-import { useEffect, useState } from "react";
-import { getAllVehicles, updateRegistration } from "../../services/registration";
+import { addRegistration } from "../../services/registration";
 
-function RegistrationModalEdit({ setShow, data: reg }) {
-  const [vehicles, setVehicles] = useState([]);
-
-  useEffect(() => {
-    getAllVehicles().then((data) => setVehicles(data || []));
-  }, []);
-
+function RegistrationModalAdd({ setShow }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const currentFields = Object.fromEntries(new FormData(e.target));
-    await updateRegistration({ ...currentFields, vehicle_reg_id: reg.vehicle_reg_id });
-    setShow(false);
-    window.location.reload();
+
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData);
+    await addRegistration(data);
+    setShow(false); 
+    window.location.reload(); 
   };
 
-  // Safe date helper to completely prevent splitting/string errors on undefined or raw database strings
-  const safeFormatDate = (dateVal) => {
-    if (!dateVal) return "";
-    try {
-      const dateStr = String(dateVal);
-      // Handles standard ISO formats "YYYY-MM-DDTHH:mm:ss..."
-      if (dateStr.includes("T")) {
-        return dateStr.split("T")[0];
-      }
-      // If it's already "YYYY-MM-DD" from the database, slice just the first 10 characters safely
-      return dateStr.slice(0, 10);
-    } catch (err) {
-      console.error("Date formatting error:", err);
-      return "";
-    }
+  // FIXED: Generates today's date using local calendar boundaries instead of UTC
+  const getLocalTodayString = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
   return (
@@ -42,57 +29,51 @@ function RegistrationModalEdit({ setShow, data: reg }) {
           </div>
           
           <div className="reg-form-field-group">
-            <label>Plate Number</label>
-            <div className="reg-static-text-display">
-              {reg.plate_no || "N/A"}
-            </div>
-          </div>
-
-          <div className="reg-form-field-group">
-            <label>Associated Vehicle</label>
-            <select name="vehicle_id" defaultValue={reg.vehicle_id} required>
-              {vehicles.map(v => (
-                <option key={v.vehicle_id} value={v.vehicle_id}>
-                  {v.plate_no} - {v.make} {v.model}
-                </option>
-              ))}
+            <label htmlFor="vehicle_id">Select Vehicle</label>
+            <select name="vehicle_id" id="vehicle_id" required>
+              <option value="" disabled selected hidden>
+                Choose a vehicle...
+              </option>
+              <option value="1">Toyota Vios (JVA1206)</option>
+              <option value="2">Mitsubishi Xpander (JCC1206)</option>
             </select>
           </div>
 
           <div className="reg-form-field-group">
-            <label>Color</label>
+            <label htmlFor="color">Color</label>
             <input 
               type="text" 
               name="color" 
               id="color" 
-              defaultValue={reg.color || ""}
+              placeholder="e.g., Gold, Quartz White Pearl"
               required 
             />
           </div>
 
           <div className="reg-form-field-group">
-            <label>Registration Date</label>
-            <input 
-              type="date" 
-              name="registration_date" 
-              defaultValue={safeFormatDate(reg.registration_date)} 
-              required 
+            <label htmlFor="registration_date">Registration Date</label>
+            <input
+              type="date"
+              name="registration_date"
+              id="registration_date"
+              defaultValue={getLocalTodayString()} /* FIXED: Now tracks local time correctly */
+              required
             />
           </div>
 
           <div className="reg-form-field-group">
-            <label>Expiration Date</label>
-            <input 
-              type="date" 
-              name="expiration_date" 
-              defaultValue={safeFormatDate(reg.expiration_date)} 
-              required 
+            <label htmlFor="expiration_date">Expiration Date</label>
+            <input
+              type="date"
+              name="expiration_date"
+              id="expiration_date"
+              required
             />
           </div>
 
           <div className="reg-form-field-group">
-            <label>Registration Status</label>
-            <select name="registration_status" defaultValue={reg.registration_status}>
+            <label htmlFor="registration_status">Registration Status</label>
+            <select name="registration_status" id="registration_status">
               <option value="Active">Active</option>
               <option value="Expired">Expired</option>
               <option value="Suspended">Suspended</option>
@@ -100,15 +81,17 @@ function RegistrationModalEdit({ setShow, data: reg }) {
           </div>
 
           <div className="reg-modal-button-container">
-            <button 
-              type="button" 
-              className="reg-cancel" 
-              onClick={() => setShow(false)}
+            <button
+              className="reg-cancel"
+              type="button"
+              onClick={() => {
+                setShow(false);
+              }}
             >
               Cancel
             </button>
             <button type="submit" className="reg-save">
-              Edit Registration
+              Save
             </button>
           </div>
         </form>
@@ -117,4 +100,4 @@ function RegistrationModalEdit({ setShow, data: reg }) {
   );
 }
 
-export default RegistrationModalEdit;
+export default RegistrationModalAdd;
