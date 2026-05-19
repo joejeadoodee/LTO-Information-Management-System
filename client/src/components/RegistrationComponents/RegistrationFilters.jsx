@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 
 function RegistrationFilters({ setFilter }) {
   const formRef = useRef(null);
@@ -10,6 +10,13 @@ function RegistrationFilters({ setFilter }) {
     const day = String(today.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   };
+
+  useEffect(() => {
+    setFilter({
+      registration_status: "",
+      date: "" 
+    });
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -24,17 +31,21 @@ function RegistrationFilters({ setFilter }) {
     }
     setFilter({
       registration_status: "",
-      date: "" // Keeps target open to fetch all logs dynamically
+      date: "" 
     });
   };
 
   return (
     <form ref={formRef} onSubmit={handleSubmit} className="reg-filter-form-row">
-      <select name="registration_status" id="registration_status" defaultValue="">
+      <select 
+        name="registration_status" 
+        id="registration_status" 
+        defaultValue=""
+      >
         <option value="">All Registrations</option>
-        <option value="active">Active</option>
-        <option value="expired">Expired</option>
-        <option value="suspended">Suspended</option>
+        <option value="Active">Active</option>
+        <option value="Expired">Expired</option>
+        <option value="Suspended">Suspended</option>
       </select>
 
       <div className="reg-filter-date-group">
@@ -47,8 +58,13 @@ function RegistrationFilters({ setFilter }) {
         />
       </div>
 
-      <button className="apply-filters-btn" type="submit">Apply Filters</button>
-      <button className="clear-filters-btn" type="button" onClick={handleClearFilters}>Clear</button>
+      <button className="apply-filters-btn" type="submit">
+        Apply Filters
+      </button>
+      
+      <button className="clear-filters-btn" type="button" onClick={handleClearFilters}>
+        Clear
+      </button>
     </form>
   );
 }

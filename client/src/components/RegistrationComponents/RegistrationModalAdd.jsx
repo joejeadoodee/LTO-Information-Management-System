@@ -22,13 +22,16 @@ function RegistrationModalAdd({ setShow }) {
     setRegDate(formatDateToString(today));
     setExpDate(formatDateToString(nextYear));
 
-    getAllVehicles().then((data) => setVehicles(data || []));
+    getAllVehicles().then((data) => {
+      console.log("Raw vehicles pulled from database:", data);
+      setVehicles(data || []);
+    });
   }, []);
 
   const handleVehicleChange = (e) => {
     const vehicleId = e.target.value;
     const matchingVehicle = vehicles.find(
-      (v) => String(v.id || v.vehicle_id) === String(vehicleId)
+      (v) => String(v.vehicle_id || v.id) === String(vehicleId)
     );
     if (matchingVehicle) {
       setSelectedColor(matchingVehicle.color || "");
@@ -50,14 +53,25 @@ function RegistrationModalAdd({ setShow }) {
     e.preventDefault();
 
     const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData);
+    const rawData = Object.fromEntries(formData);
     
-    // Auto-generates registration_no to pass backend strict controller requirements
-    if (!data.registration_no) {
-      data.registration_no = "REG-" + Math.floor(100000 + Math.random() * 900000);
-    }
+    // SANITIZATION LAYER: Build the precise payload structure your backend query demands
+    const cleanedPayload = {
+      registration_no: "REG-" + Math.floor(100000 + Math.random() * 900000),
+      registration_date: rawData.registration_date,
+      expiration_date: rawData.expiration_date,
+      // Converts "Active" -> "active" to resolve potential SQL ENUM case-sensitivity crashes
+      registration_status: String(rawData.registration_status).toLowerCase(),
+      // Forces the ID into a strict integer digit for the SQL foreign key match
+      vehicle_id: Number(rawData.vehicle_id)
+    };
 
-    await addRegistration(data);
+    // Open your browser inspector tool to verify this payload structure live!
+    console.log("CLEANED PAYLOAD Dispatched to Express Server:", cleanedPayload);
+
+    const response = await addRegistration(cleanedPayload);
+    console.log("SERVER RESPONSE AFTER INSERTION:", response);
+
     setShow(false); 
     window.location.reload(); 
   };
@@ -82,11 +96,14 @@ function RegistrationModalAdd({ setShow }) {
               <option value="" disabled hidden>
                 Choose a vehicle...
               </option>
-              {vehicles.map((v) => (
-                <option key={v.id || v.vehicle_id} value={v.id || v.vehicle_id}>
-                  {v.plate_no} - {v.model || "Vehicle Entry"}
-                </option>
-              ))}
+              {vehicles.map((v) => {
+                const actualId = v.vehicle_id || v.id;
+                return (
+                  <option key={`veh-opt-${actualId}`} value={actualId}>
+                    {v.plate_no || "Unknown Plate"} - {v.model || v.make || "Vehicle Entry"}
+                  </option>
+                );
+              })}
             </select>
           </div>
 
@@ -130,9 +147,9 @@ function RegistrationModalAdd({ setShow }) {
           <div className="reg-form-field-group">
             <label htmlFor="registration_status">Registration Status</label>
             <select name="registration_status" id="registration_status">
-              <option value="Active">Active</option>
-              <option value="Expired">Expired</option>
-              <option value="Suspended">Suspended</option>
+              <option value="active">Active</option>
+              <option value="expired">Expired</option>
+              <option value="suspended">Suspended</option>
             </select>
           </div>
 

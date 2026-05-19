@@ -29,8 +29,17 @@ function RegistrationsPage() {
   const [editContent, setEditContent] = useState(null);
 
   useEffect(() => {
-    // FIX: Guarantees a valid, non-empty date parameter string is ALWAYS dispatched
-    const targetDate = filter.date || getLocalTodayString();
+    let targetDate = filter.date;
+    if (!filter.registration_status || filter.registration_status === "") {
+      const farFutureDate = new Date();
+      farFutureDate.setFullYear(farFutureDate.getFullYear() + 100);
+      
+      const year = farFutureDate.getFullYear();
+      const month = String(farFutureDate.getMonth() + 1).padStart(2, '0');
+      const day = String(farFutureDate.getDate()).padStart(2, '0');
+      
+      targetDate = `${year}-${month}-${day}`;
+    }
 
     getVehiclesExpiredRegistration({ date: targetDate }).then((data) => {
       let processData = Array.isArray(data) ? data : [];
