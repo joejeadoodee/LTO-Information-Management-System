@@ -2,7 +2,26 @@ import pool from "../db/database.js";
 
 const getAllRegistrations = async (req, res) => {
   try {
-    const [rows] = await pool.query("SELECT * FROM vehicleRegistration");
+    const queryStr = `
+      SELECT 
+        v.vehicle_id,
+        v.plate_no,
+        v.make,
+        v.model,
+        v.vehicle_type,
+        v.color,
+        vr.vehicle_reg_id,
+        vr.registration_no,
+        vr.registration_date,
+        vr.expiration_date,
+        vr.registration_status
+      FROM 
+        vehicle v
+      INNER JOIN 
+        vehicleRegistration vr ON v.vehicle_id = vr.vehicle_id
+    `;
+    
+    const [rows] = await pool.query(queryStr);
     res.status(200).json({ success: true, data: rows });
   } catch (err) {
     res.status(500).json({ success: false, msg: err.message });
@@ -12,10 +31,28 @@ const getAllRegistrations = async (req, res) => {
 const getRegistration = async (req, res) => {
   const { id } = req.params;
   try {
-    const [rows] = await pool.query(
-      "SELECT * FROM vehicleRegistration WHERE vehicle_reg_id = ?",
-      [id],
-    );
+    const queryStr = `
+      SELECT 
+        v.vehicle_id,
+        v.plate_no,
+        v.make,
+        v.model,
+        v.vehicle_type,
+        v.color,
+        vr.vehicle_reg_id,
+        vr.registration_no,
+        vr.registration_date,
+        vr.expiration_date,
+        vr.registration_status
+      FROM 
+        vehicle v
+      INNER JOIN 
+        vehicleRegistration vr ON v.vehicle_id = vr.vehicle_id
+      WHERE 
+        vr.vehicle_reg_id = ?
+    `;
+    
+    const [rows] = await pool.query(queryStr, [id]);
     if (rows.length === 0)
       return res
         .status(404)
@@ -73,6 +110,7 @@ const updateRegistration = async (req, res) => {
     expiration_date,
     registration_status,
     vehicle_id,
+    color,
   } = req.body;
   try {
     const [existing] = await pool.query(
@@ -83,6 +121,14 @@ const updateRegistration = async (req, res) => {
       return res
         .status(404)
         .json({ success: false, msg: `No registration with id ${id}` });
+
+    if (color && vehicle_id) {
+      await pool.query(
+        "UPDATE vehicle SET color = ? WHERE vehicle_id = ?",
+        [color, vehicle_id]
+      );
+    }
+
     await pool.query(
       "UPDATE vehicleRegistration SET registration_no = ?, registration_date = ?, expiration_date = ?, registration_status = ?, vehicle_id = ? WHERE vehicle_reg_id = ?",
       [

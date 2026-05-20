@@ -84,7 +84,8 @@ function RegistrationModalEdit({ setShow, data, setFetchCounter, allRegistration
         registration_date: finalRegDate,
         expiration_date: finalExpDate,
         registration_status: finalStatus,
-        vehicle_id: Number(data.vehicle_id)
+        vehicle_id: Number(data.vehicle_id),
+        color: currentColor 
       };
 
       await updateRegistration(updatedPayload);
