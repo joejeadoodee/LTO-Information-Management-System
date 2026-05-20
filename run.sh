@@ -34,7 +34,7 @@ npm run dev -- --force &
 FRONTEND_FE_PID=$!
 
 echo "launch"
-
+sleep 1
 echo "running"
 if command -v xdg-open &> /dev/null; then
     xdg-open http://localhost:5173
