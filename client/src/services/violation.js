@@ -54,9 +54,9 @@ async function addViolation({
 
     return violation_id;
   } catch (error) {
-  console.error("API ERROR:", error.response?.data || error.message);
-  throw error;
-}
+    console.error("API ERROR:", error.response?.data || error.message);
+    throw error;
+  }
 }
 
 async function updateViolation({ violation_id, ...data }) {
@@ -84,7 +84,7 @@ async function getViolationById(id) {
   }
 }
 
-async function getViolationsByYear(year) {
+async function getViolationsByYear({ year }) {
   try {
     const {
       data: { data },

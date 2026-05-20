@@ -1,33 +1,16 @@
 import { useEffect, useState } from "react";
 import { getAllVehicles, addRegistration } from "../../services/registration";
 
-function RegistrationModalAdd({ setShow, setFetchCounter, allRegistrations }) {
+function RegistrationModalAdd({ setShow }) {
   const [vehicles, setVehicles] = useState([]);
   const [selectedColor, setSelectedColor] = useState("");
   const [regDate, setRegDate] = useState("");
   const [expDate, setExpDate] = useState("");
-  const [regStatus, setRegStatus] = useState("active");
-
-  // Calculate global max incremented ID
-  const calculateNextGlobalId = () => {
-    if (!allRegistrations || allRegistrations.length === 0) return "100000001";
-    
-    const numericIds = allRegistrations
-      .map(r => parseInt(r.registration_no, 10))
-      .filter(num => !isNaN(num));
-
-    if (numericIds.length === 0) return "100000001";
-    
-    const maxId = Math.max(...numericIds);
-    return String(maxId + 1);
-  };
-
-  const nextCalculatedAddId = calculateNextGlobalId();
 
   const formatDateToString = (dateObj) => {
     const year = dateObj.getFullYear();
-    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-    const day = String(dateObj.getDate()).padStart(2, '0');
+    const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+    const day = String(dateObj.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
   };
 
@@ -45,7 +28,7 @@ function RegistrationModalAdd({ setShow, setFetchCounter, allRegistrations }) {
   const handleVehicleChange = (e) => {
     const vehicleId = e.target.value;
     const matchingVehicle = vehicles.find(
-      (v) => String(v.vehicle_id || v.id) === String(vehicleId)
+      (v) => String(v.vehicle_id || v.id) === String(vehicleId),
     );
     if (matchingVehicle) {
       setSelectedColor(matchingVehicle.color || "");
@@ -68,18 +51,19 @@ function RegistrationModalAdd({ setShow, setFetchCounter, allRegistrations }) {
 
     const formData = new FormData(e.target);
     const rawData = Object.fromEntries(formData);
-    
+
+    // Pass raw form elements directly to allow your backend body-parser to extract values
     const cleanPayload = {
-      registration_no: nextCalculatedAddId, // Locked System Generated Value
+      registration_no: "REG-" + Math.floor(10000 + Math.random() * 90000),
       registration_date: rawData.registration_date,
       expiration_date: rawData.expiration_date,
-      registration_status: regStatus,
-      vehicle_id: rawData.vehicle_id 
+      registration_status: rawData.registration_status,
+      vehicle_id: rawData.vehicle_id, // Sent as standard form field value string
     };
 
     await addRegistration(cleanPayload);
-    setFetchCounter((prev) => prev + 1);
-    setShow(false); 
+    setShow(false);
+    window.location.reload();
   };
 
   return (
@@ -89,14 +73,14 @@ function RegistrationModalAdd({ setShow, setFetchCounter, allRegistrations }) {
           <div>
             <h3>REGISTRATION DETAILS</h3>
           </div>
-          
+
           <div className="reg-form-field-group">
             <label htmlFor="vehicle_id">Select Vehicle</label>
-            <select 
-              name="vehicle_id" 
-              id="vehicle_id" 
-              required 
-              defaultValue="" 
+            <select
+              name="vehicle_id"
+              id="vehicle_id"
+              required
+              defaultValue=""
               onChange={handleVehicleChange}
             >
               <option value="" disabled hidden>
@@ -106,7 +90,8 @@ function RegistrationModalAdd({ setShow, setFetchCounter, allRegistrations }) {
                 const actualId = v.vehicle_id || v.id;
                 return (
                   <option key={`veh-opt-${actualId}`} value={actualId}>
-                    {v.plate_no || "Unknown Plate"} - {v.model || v.make || "Vehicle Entry"}
+                    {v.plate_no || "Unknown Plate"} -{" "}
+                    {v.model || v.make || "Vehicle Entry"}
                   </option>
                 );
               })}
@@ -114,26 +99,15 @@ function RegistrationModalAdd({ setShow, setFetchCounter, allRegistrations }) {
           </div>
 
           <div className="reg-form-field-group">
-            <label htmlFor="registration_no_display">Registration ID / Number</label>
-            <input 
-              type="text" 
-              id="registration_no_display"
-              value={nextCalculatedAddId} 
-              disabled 
-              style={{ backgroundColor: "#e9ecef", fontWeight: "bold", color: "#495057" }}
-            />
-          </div>
-
-          <div className="reg-form-field-group">
             <label htmlFor="color">Color</label>
-            <input 
-              type="text" 
-              name="color" 
-              id="color" 
+            <input
+              type="text"
+              name="color"
+              id="color"
               value={selectedColor}
               onChange={(e) => setSelectedColor(e.target.value)}
               placeholder="Auto-fills on selection"
-              required 
+              required
             />
           </div>
 
@@ -163,12 +137,7 @@ function RegistrationModalAdd({ setShow, setFetchCounter, allRegistrations }) {
 
           <div className="reg-form-field-group">
             <label htmlFor="registration_status">Registration Status</label>
-            <select 
-              name="registration_status" 
-              id="registration_status"
-              value={regStatus}
-              onChange={(e) => setRegStatus(e.target.value)}
-            >
+            <select name="registration_status" id="registration_status">
               <option value="active">Active</option>
               <option value="expired">Expired</option>
               <option value="suspended">Suspended</option>
@@ -176,7 +145,11 @@ function RegistrationModalAdd({ setShow, setFetchCounter, allRegistrations }) {
           </div>
 
           <div className="reg-modal-button-container">
-            <button className="reg-cancel" type="button" onClick={() => setShow(false)}>
+            <button
+              className="reg-cancel"
+              type="button"
+              onClick={() => setShow(false)}
+            >
               Cancel
             </button>
             <button type="submit" className="reg-save">
