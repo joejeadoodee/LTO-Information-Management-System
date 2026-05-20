@@ -2,7 +2,7 @@
 
 set -e
 echo "db setup"
-mariadb -uroot < server-setup.sql
+mariadb -uroot -p3981 < server-setup.sql
 
 echo "db success"
 

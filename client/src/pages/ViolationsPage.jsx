@@ -1,8 +1,5 @@
-import { useEffect, useState } from "react";
-import {
-  getAllViolations,
-  deleteViolation,
-} from "../services/violation.js";
+import { useEffect, useState, Fragment } from "react";
+import { getAllViolations, deleteViolation } from "../services/violation.js";
 import Sidebar from "../components/Sidebar.jsx";
 import Header from "../components/Header.jsx";
 import ViolationModalAdd from "../components/ViolationComponents/ViolationModalAdd.jsx";
@@ -24,30 +21,36 @@ function ViolationsPage() {
   // Render table rows
   const violationsDisplay = violations.map((violation) => {
     const violationDate = violation.violation_date_time
-      ? new Date(violation.violation_date_time)
-          .toDateString()
-          .slice(4)
+      ? new Date(violation.violation_date_time).toDateString().slice(4)
       : "";
 
     return (
-      <>
-        <div className="item">{violation.violation_id}</div>
-        <div className="item">{violation.full_name}</div>
-        <div className="item">
+      <Fragment key={violation.violation_id}>
+        <div className="text-[#4a5769] border-b border-[#e9e9e9] p-5">
+          {violation.violation_id}
+        </div>
+        <div className="text-[#4a5769] border-b border-[#e9e9e9] p-5">
+          {violation.full_name}
+        </div>
+        <div className="text-[#4a5769] border-b border-[#e9e9e9] p-5">
           {violation.plate_no ?? "N/A"}
         </div>
-        <div className="item">
+        <div className="text-[#4a5769] border-b border-[#e9e9e9] p-5">
           {violation.violation_type}
         </div>
-        <div className="item">{violationDate}</div>
-        <div className="item">{violation.location}</div>
-        <div className="item">
+        <div className="text-[#4a5769] border-b border-[#e9e9e9] p-5">
+          {violationDate}
+        </div>
+        <div className="text-[#4a5769] border-b border-[#e9e9e9] p-5">
+          {violation.location}
+        </div>
+        <div className="text-[#4a5769] border-b border-[#e9e9e9] p-5">
           {violation.fine_amount}
         </div>
-        <div className="item">
+        <div className="text-[#4a5769] border-b border-[#e9e9e9] p-5">
           {violation.violation_status}
         </div>
-        <div className="item">
+        <div className="text-[#4a5769] border-b border-[#e9e9e9] p-5">
           <button
             className="button-behave view"
             onClick={() => {
@@ -61,25 +64,21 @@ function ViolationsPage() {
           <button
             className="button-behave delete"
             onClick={() => {
-              const deleteId =
-                violation.violation_id;
+              const deleteId = violation.violation_id;
 
               // Delete from database
               deleteViolation(deleteId);
 
               // Remove from UI
               setViolations((prev) =>
-                prev.filter(
-                  (item) =>
-                    item.violation_id !== deleteId
-                )
+                prev.filter((item) => item.violation_id !== deleteId),
               );
             }}
           >
             Delete
           </button>
         </div>
-      </>
+      </Fragment>
     );
   });
 
@@ -91,18 +90,11 @@ function ViolationsPage() {
       <main className="main">
         {/* Edit Modal */}
         {showEdit ? (
-          <ViolationModalEdit
-            setShow={setShowEdit}
-            data={editContent}
-          />
+          <ViolationModalEdit setShow={setShowEdit} data={editContent} />
         ) : null}
 
         {/* Add Modal */}
-        {showAdd ? (
-          <ViolationModalAdd
-            setShow={setShowAdd}
-          />
-        ) : null}
+        {showAdd ? <ViolationModalAdd setShow={setShowAdd} /> : null}
 
         {/* Add Button */}
         <button
@@ -116,27 +108,43 @@ function ViolationsPage() {
         {violations.length > 0 ? (
           <div className="table-container">
             {/* Header */}
-            <div className="table header violation-table">
-              <div className="item">ID</div>
-              <div className="item">DRIVER</div>
-              <div className="item">PLATE NO</div>
-              <div className="item">TYPE</div>
-              <div className="item">DATE</div>
-              <div className="item">LOCATION</div>
-              <div className="item">FINE</div>
-              <div className="item">STATUS</div>
-              <div className="item">ACTION</div>
+            <div className="grid grid-cols-[7fr_16fr_12fr_14fr_12fr_16fr_10fr_11fr_18fr] w-full bg-[#3d5f93] rounded-t-[20px] py-2.5">
+              <div className="font-light pt-[5px] px-5 pb-[10px] text-white">
+                ID
+              </div>
+              <div className="font-light pt-[5px] px-5 pb-[10px] text-white">
+                DRIVER
+              </div>
+              <div className="font-light pt-[5px] px-5 pb-[10px] text-white">
+                PLATE NO
+              </div>
+              <div className="font-light pt-[5px] px-5 pb-[10px] text-white">
+                TYPE
+              </div>
+              <div className="font-light pt-[5px] px-5 pb-[10px] text-white">
+                DATE
+              </div>
+              <div className="font-light pt-[5px] px-5 pb-[10px] text-white">
+                LOCATION
+              </div>
+              <div className="font-light pt-[5px] px-5 pb-[10px] text-white">
+                FINE
+              </div>
+              <div className="font-light pt-[5px] px-5 pb-[10px] text-white">
+                STATUS
+              </div>
+              <div className="font-light pt-[5px] px-5 pb-[10px] text-white">
+                ACTION
+              </div>
             </div>
 
             {/* Content */}
-            <div className="table content violation-table">
+            <div className="grid grid-cols-[7fr_16fr_12fr_14fr_12fr_16fr_10fr_11fr_18fr] w-full bg-white">
               {violationsDisplay}
             </div>
           </div>
         ) : (
-          <div className="no-results">
-            No violations
-          </div>
+          <div className="no-results">No violations</div>
         )}
       </main>
     </>

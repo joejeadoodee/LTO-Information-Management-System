@@ -16,7 +16,8 @@ function DriversPage() {
   const [editContent, setEditContent] = useState({});
 
   useEffect(() => {
-    getFilteredDrivers(filter).then((data) => setDrivers(data)); }, [filter]);
+    getFilteredDrivers(filter).then((data) => setDrivers(data));
+  }, [filter]);
 
   // Loop through drivers and create a row display for each
   const driversDisplay = drivers.map((driver) => {
@@ -70,7 +71,7 @@ function DriversPage() {
     <>
       <Header />
       <Sidebar page="drivers" />
-      <main className="main">
+      <main className="main driver">
         {/* Only render edit modal if showEdit is true*/}
         {showEdit ? (
           <DriverModalEdit setShow={setShowEdit} data={editContent} />
