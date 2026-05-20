@@ -47,11 +47,11 @@ function RegistrationsPage() {
       <Header />
       <Sidebar page="registrations" />
       <main className="reg-main-container">
-        {showEdit ? (
-          <RegistrationModalEdit setShow={setShowEdit} data={editContent} />
-        ) : undefined}
-
-        {showAdd ? <RegistrationModalAdd setShow={setShowAdd} /> : undefined}
+      {showEdit && editContent ? (
+        <RegistrationModalEdit setShow={setShowEdit} data={editContent} />
+      ) : showAdd ? (
+        <RegistrationModalAdd setShow={setShowAdd} />
+      ) : null}
 
         <button
           className="reg-add-action-btn reg-btn-behavior"

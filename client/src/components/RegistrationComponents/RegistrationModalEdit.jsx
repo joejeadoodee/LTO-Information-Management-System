@@ -1,99 +1,90 @@
-import { useEffect, useState } from "react";
-import { getAllVehicles, addRegistration } from "../../services/registration";
+import { useState, useEffect } from "react";
+import { updateRegistration } from "../../services/registration";
 
-function RegistrationModalAdd({ setShow }) {
-  const [vehicles, setVehicles] = useState([]);
-  const [selectedColor, setSelectedColor] = useState("");
-  const [regDate, setRegDate] = useState("");
-  const [expDate, setExpDate] = useState("");
-
-  const formatDateToString = (dateObj) => {
-    const year = dateObj.getFullYear();
-    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-    const day = String(dateObj.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
-
-  useEffect(() => {
-    const today = new Date();
-    const nextYear = new Date();
-    nextYear.setFullYear(today.getFullYear() + 1);
-
-    setRegDate(formatDateToString(today));
-    setExpDate(formatDateToString(nextYear));
-
-    getAllVehicles().then((data) => setVehicles(data || []));
-  }, []);
-
-  const handleVehicleChange = (e) => {
-    const vehicleId = e.target.value;
-    const matchingVehicle = vehicles.find(
-      (v) => String(v.vehicle_id || v.id) === String(vehicleId)
+function RegistrationModalEdit({ setShow, data }) {
+  // CRITICAL PROTECTION: If data is missing or undefined, stop right here
+  if (!data) {
+    return (
+      <div className="reg-add-form-overlay">
+        <div className="reg-modal-wrapper-box">
+          <p style={{ color: "red", padding: "20px" }}>Error: No row data passed to Edit Modal.</p>
+          <button type="button" onClick={() => setShow(false)}>Close</button>
+        </div>
+      </div>
     );
-    if (matchingVehicle) {
-      setSelectedColor(matchingVehicle.color || "");
+  }
+
+  // 1. Explicitly initialize your inputs with the clicked row data fields
+  const [currentColor, setCurrentColor] = useState(data.color || "");
+  const [regStatus, setRegStatus] = useState(data.registration_status || "Active");
+
+  // Safe calendar date converter (Handles raw strings or Date objects cleanly)
+  const safeFormatDate = (dateVal) => {
+    if (!dateVal) return "";
+    try {
+      const d = new Date(dateVal);
+      if (isNaN(d.getTime())) return ""; 
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0'); 
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    } catch { 
+      return ""; 
     }
   };
 
-  const handleDateChange = (e) => {
-    const newRegDateStr = e.target.value;
-    setRegDate(newRegDateStr);
+  const [regDate, setRegDate] = useState(safeFormatDate(data.registration_date));
+  const [expDate, setExpDate] = useState(safeFormatDate(data.expiration_date));
 
-    if (newRegDateStr) {
-      const currentRegDate = new Date(newRegDateStr);
-      currentRegDate.setFullYear(currentRegDate.getFullYear() + 1);
-      setExpDate(formatDateToString(currentRegDate));
+  // Sync state if the row selection dynamically changes
+  useEffect(() => {
+    if (data) {
+      setCurrentColor(data.color || "");
+      setRegStatus(data.registration_status || "Active");
+      setRegDate(safeFormatDate(data.registration_date));
+      setExpDate(safeFormatDate(data.expiration_date));
     }
-  };
+  }, [data]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    try {
+      const formData = new FormData(e.target);
+      const currentFields = Object.fromEntries(formData);
+      
+      const updatedPayload = {
+        vehicle_reg_id: Number(data.vehicle_reg_id),
+        registration_no: data.registration_no,
+        registration_date: currentFields.registration_date,
+        expiration_date: currentFields.expiration_date,
+        registration_status: currentFields.registration_status,
+        vehicle_id: Number(data.vehicle_id) // Keeps the structural relational key locked
+      };
 
-    const formData = new FormData(e.target);
-    const rawData = Object.fromEntries(formData);
-    
-    // Pass raw form elements directly to allow your backend body-parser to extract values
-    const cleanPayload = {
-      registration_no: "REG-" + Math.floor(100000 + Math.random() * 900000),
-      registration_date: rawData.registration_date,
-      expiration_date: rawData.expiration_date,
-      registration_status: rawData.registration_status,
-      vehicle_id: rawData.vehicle_id // Sent as standard form field value string
-    };
-
-    await addRegistration(cleanPayload);
-    setShow(false); 
-    window.location.reload(); 
+      await updateRegistration(updatedPayload);
+      setShow(false);
+      window.location.reload();
+    } catch (err) {
+      console.error("Edit form processing crash:", err);
+    }
   };
 
   return (
-    <div className="reg-add-form-overlay">
+    <div className="reg-add-form-overlay edit-modal-specific">
       <div className="reg-modal-wrapper-box">
         <form onSubmit={handleSubmit}>
           <div>
-            <h3>REGISTRATION DETAILS</h3>
+            {/* Changing heading to make sure you know exactly which modal is currently visible */}
+            <h3 style={{ color: "#0056b3" }}>MODE: EDITING REGISTRATION</h3>
           </div>
           
           <div className="reg-form-field-group">
-            <label htmlFor="vehicle_id">Select Vehicle</label>
-            <select 
-              name="vehicle_id" 
-              id="vehicle_id" 
-              required 
-              defaultValue="" 
-              onChange={handleVehicleChange}
-            >
-              <option value="" disabled hidden>
-                Choose a vehicle...
+            <label htmlFor="vehicle_display">Active Target Vehicle</label>
+            <select id="vehicle_display" disabled value="current">
+              <option value="current">
+                {data.plate_no ? `${data.plate_no} — ` : ""}
+                {data.make || data.manufacturer || "N/A"} {data.model || ""}
               </option>
-              {vehicles.map((v) => {
-                const actualId = v.vehicle_id || v.id;
-                return (
-                  <option key={`veh-opt-${actualId}`} value={actualId}>
-                    {v.plate_no || "Unknown Plate"} - {v.model || v.make || "Vehicle Entry"}
-                  </option>
-                );
-              })}
             </select>
           </div>
 
@@ -103,40 +94,44 @@ function RegistrationModalAdd({ setShow }) {
               type="text" 
               name="color" 
               id="color" 
-              value={selectedColor}
-              onChange={(e) => setSelectedColor(e.target.value)}
-              placeholder="Auto-fills on selection"
+              value={currentColor} 
+              onChange={(e) => setCurrentColor(e.target.value)}
               required 
             />
           </div>
 
           <div className="reg-form-field-group">
             <label htmlFor="registration_date">Registration Date</label>
-            <input
-              type="date"
-              name="registration_date"
+            <input 
+              type="date" 
+              name="registration_date" 
               id="registration_date"
               value={regDate}
-              onChange={handleDateChange}
-              required
+              onChange={(e) => setRegDate(e.target.value)}
+              required 
             />
           </div>
 
           <div className="reg-form-field-group">
             <label htmlFor="expiration_date">Expiration Date</label>
-            <input
-              type="date"
-              name="expiration_date"
+            <input 
+              type="date" 
+              name="expiration_date" 
               id="expiration_date"
               value={expDate}
               onChange={(e) => setExpDate(e.target.value)}
-              required
+              required 
             />
           </div>
 
           <div className="reg-form-field-group">
             <label htmlFor="registration_status">Registration Status</label>
-            <select name="registration_status" id="registration_status">
+            <select 
+              name="registration_status" 
+              id="registration_status" 
+              value={regStatus}
+              onChange={(e) => setRegStatus(e.target.value)}
+            >
               <option value="Active">Active</option>
               <option value="Expired">Expired</option>
               <option value="Suspended">Suspended</option>
@@ -144,11 +139,15 @@ function RegistrationModalAdd({ setShow }) {
           </div>
 
           <div className="reg-modal-button-container">
-            <button className="reg-cancel" type="button" onClick={() => setShow(false)}>
+            <button 
+              type="button" 
+              className="reg-cancel" 
+              onClick={() => setShow(false)}
+            >
               Cancel
             </button>
             <button type="submit" className="reg-save">
-              Save
+              Save Changes
             </button>
           </div>
         </form>
@@ -157,4 +156,4 @@ function RegistrationModalAdd({ setShow }) {
   );
 }
 
-export default RegistrationModalAdd;
+export default RegistrationModalEdit;
