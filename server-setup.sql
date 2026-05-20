@@ -63,7 +63,7 @@ CREATE TABLE traffic_violation (
   violation_date_time DATETIME NOT NULL,
   location VARCHAR(255) NOT NULL,
   fine_amount DECIMAL(10, 2) NOT NULL,
-  violation_status ENUM('unpaid', 'paid', 'contested') DEFAULT 'unpaid',
+  violation_status ENUM('unpaid', 'paid', 'pending') DEFAULT 'unpaid',
   officer_name VARCHAR(255),
   driver_id INT NOT NULL,
   vehicle_id INT,
