@@ -1,82 +1,67 @@
--- REPORTS TO BE GENERATED
--- View all registered drivers filtered by: License type, License status, Age range, Sex
-SELECT
-    d.*,
-    l.license_type,
-    l.license_status
-FROM
-    driver d
-    JOIN license l ON d.driver_id = l.driver_id
-WHERE
-    l.license_type = 'Professional'
-    AND l.license_status = 'Valid'
-    AND d.sex = 'M'
-    AND TIMESTAMPDIFF (YEAR, d.date_of_birth, CURDATE ()) BETWEEN 20 AND 40;
+import axios from "axios";
 
--- View all vehicles owned by a given driver
-SELECT
-    v.*
-FROM
-    vehicle v
-    JOIN driver d ON v.driver_id = d.driver_id
-WHERE
-    d.full_name = ?;
+async function getVehiclesExpiredRegistration({ date }) {
+  try {
+    const response = await axios.get(`/api/vehicle/expired-registration?date=${date}`);
+    const regRecords = response.data?.data || response.data || [];
 
--- place holder for now
--- View all vehicles with expired registrations as of given date
-SELECT
-    v.*,
-    vr.expiration_date
-FROM
-    vehicle v
-    JOIN vehicleRegistration vr ON v.vehicle_id = vr.vehicle_id
-WHERE
-    vr.expiration_date <= CURDATE ();
+    const formatted = regRecords.map((reg) => ({
+      ...reg,
+      registration_date: reg.registration_date ? new Date(reg.registration_date) : null, 
+      expiration_date: reg.expiration_date ? new Date(reg.expiration_date) : null,     
+    }));
 
--- View all drivers with expired or suspended licenses
-SELECT
-    d.*,
-    l.license_status
-FROM
-    driver d
-    JOIN license l ON d.driver_id = l.driver_id
-WHERE
-    l.license_status IN ('Expired', 'Suspended')
-ORDER BY
-    l.license_status,
-    d.full_name;
+    return formatted;
+  } catch (error) {
+    console.error("Error in getVehiclesExpiredRegistration:", error);
+    return []; 
+  }
+}
 
--- View all traffic violations by a given driver within a date range
-SELECT
-    d.full_name,
-    tv.violation_type,
-    tv.violation_date_time,
-    tv.fine_amount
-FROM
-    traffic_violation tv
-    JOIN driver d ON tv.driver_id = d.driver_id
-WHERE
-    d.driver_id = 1
-    AND tv.violation_date_time BETWEEN '2025-01-01' AND '2025-12-31'
-ORDER BY
-    tv.violation_date_time DESC;
+async function getAllVehicles() {
+  try {
+    const response = await axios.get("/api/vehicle");
+    return response.data?.data || response.data || [];
+  } catch (error) {
+    console.error("Error pulling drop-down options:", error);
+    return [];
+  }
+}
 
--- View the total number of violations per violation type for a given year
-SELECT
-    violation_type,
-    COUNT(*) AS total_violations
-FROM
-    traffic_violation
-WHERE
-    YEAR (violation_date_time) = 2025
-GROUP BY
-    violation_type;
+async function addRegistration(payload) {
+  try {
+    const response = await axios.post("/api/vehicle/registration", payload);
+    return response.data;
+  } catch (error) {
+    console.error("Error posting registration data payload:", error);
+    return null;
+  }
+}
 
--- View all vehicles involved in violations within a given city or region
-SELECT DISTINCT
-    v.*
-FROM
-    vehicle v
-    JOIN traffic_violation tv ON v.vehicle_id = tv.vehicle_id
-WHERE
-    tv.location LIKE '%Manila%';
+async function updateRegistration(payload) {
+  try {
+    const response = await axios.put(`/api/vehicle/registration/${payload.vehicle_reg_id}`, payload);
+    return response.data;
+  } catch (error) {
+    console.log("Error updating registration row records:", error);
+    return null;
+  }
+}
+
+async function deleteRegistration(id) {
+  try {
+    const response = await axios.delete(`/api/vehicle/registration/${id}`);
+    return response.data;
+  } catch (error) {
+    console.log("Error invoking database row removal handler:", error);
+    return null;
+  }
+}
+
+export { 
+  getVehiclesExpiredRegistration, 
+  getAllVehicles, 
+  addRegistration, 
+  updateRegistration, 
+  deleteRegistration 
+};

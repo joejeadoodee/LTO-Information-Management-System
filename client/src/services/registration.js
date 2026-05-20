@@ -48,6 +48,16 @@ async function updateRegistration(payload) {
   }
 }
 
+async function renewRegistration(payload) {
+  try {
+    const response = await axios.post("/api/vehicle/registration/renew", payload);
+    return response.data;
+  } catch (error) {
+    console.error("Error processing renewal via API:", error);
+    return null;
+  }
+}
+
 async function deleteRegistration(id) {
   try {
     const response = await axios.delete(`/api/vehicle/registration/${id}`);
@@ -63,5 +73,6 @@ export {
   getAllVehicles, 
   addRegistration, 
   updateRegistration, 
+  renewRegistration,
   deleteRegistration 
 };

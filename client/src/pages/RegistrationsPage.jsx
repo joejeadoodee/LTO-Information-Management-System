@@ -24,10 +24,10 @@ function RegistrationsPage() {
   const [registrations, setRegistrations] = useState([]);
   const [showAdd, setShowAdd] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
-  const [editContent, setEditContent] = useState(null);
+  const [modalContent, setModalContent] = useState(null);
+  const [fetchCounter, setFetchCounter] = useState(0);
 
   useEffect(() => {
-    // Send a valid local calendar date string to satisfy backend conditions
     const targetDate = filter.date || getLocalTodayString();
 
     getVehiclesExpiredRegistration({ date: targetDate }).then((data) => {
@@ -40,18 +40,19 @@ function RegistrationsPage() {
       }
       setRegistrations(processData);
     });
-  }, [filter]);
+  }, [filter, fetchCounter]);
 
   return (
     <>
       <Header />
       <Sidebar page="registrations" />
       <main className="reg-main-container">
-      {showEdit && editContent ? (
-        <RegistrationModalEdit setShow={setShowEdit} data={editContent} />
-      ) : showAdd ? (
-        <RegistrationModalAdd setShow={setShowAdd} />
-      ) : null}
+        {showEdit && modalContent && (
+          <RegistrationModalEdit setShow={setShowEdit} data={modalContent} setFetchCounter={setFetchCounter} />
+        )}
+        {showAdd && (
+          <RegistrationModalAdd setShow={setShowAdd} setFetchCounter={setFetchCounter} />
+        )}
 
         <button
           className="reg-add-action-btn reg-btn-behavior"
@@ -94,7 +95,7 @@ function RegistrationsPage() {
                       <button
                         className="reg-btn-behavior reg-view-btn"
                         onClick={() => {
-                          setEditContent(reg);
+                          setModalContent(reg);
                           setShowEdit(true);
                         }}
                       >
@@ -106,7 +107,7 @@ function RegistrationsPage() {
                           if (window.confirm("Delete this vehicle registration record?")) {
                             const deleteId = reg.vehicle_reg_id;
                             await deleteRegistration(deleteId); 
-                            setRegistrations((prev) => prev.filter((item) => item.vehicle_reg_id !== deleteId));
+                            setFetchCounter((prev) => prev + 1);
                           }
                         }}
                       >

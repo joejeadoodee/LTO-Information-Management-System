@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { getAllVehicles, addRegistration } from "../../services/registration";
 
-function RegistrationModalAdd({ setShow }) {
+function RegistrationModalAdd({ setShow, setFetchCounter }) {
   const [vehicles, setVehicles] = useState([]);
   const [selectedColor, setSelectedColor] = useState("");
+  const [regNo, setRegNo] = useState("");
   const [regDate, setRegDate] = useState("");
   const [expDate, setExpDate] = useState("");
+  const [regStatus, setRegStatus] = useState("active");
 
   const formatDateToString = (dateObj) => {
     const year = dateObj.getFullYear();
@@ -52,18 +54,17 @@ function RegistrationModalAdd({ setShow }) {
     const formData = new FormData(e.target);
     const rawData = Object.fromEntries(formData);
     
-    // Pass raw form elements directly to allow your backend body-parser to extract values
     const cleanPayload = {
-      registration_no: "REG-" + Math.floor(100000 + Math.random() * 900000),
+      registration_no: regNo,
       registration_date: rawData.registration_date,
       expiration_date: rawData.expiration_date,
-      registration_status: rawData.registration_status,
-      vehicle_id: rawData.vehicle_id // Sent as standard form field value string
+      registration_status: regStatus,
+      vehicle_id: rawData.vehicle_id 
     };
 
     await addRegistration(cleanPayload);
+    setFetchCounter((prev) => prev + 1);
     setShow(false); 
-    window.location.reload(); 
   };
 
   return (
@@ -95,6 +96,19 @@ function RegistrationModalAdd({ setShow }) {
                 );
               })}
             </select>
+          </div>
+
+          <div className="reg-form-field-group">
+            <label htmlFor="registration_no">Registration ID / Number</label>
+            <input 
+              type="text" 
+              id="registration_no"
+              maxLength="9"
+              value={regNo} 
+              onChange={(e) => setRegNo(e.target.value)} 
+              placeholder="Enter Registration ID" 
+              required 
+            />
           </div>
 
           <div className="reg-form-field-group">
@@ -136,10 +150,15 @@ function RegistrationModalAdd({ setShow }) {
 
           <div className="reg-form-field-group">
             <label htmlFor="registration_status">Registration Status</label>
-            <select name="registration_status" id="registration_status">
-              <option value="Active">Active</option>
-              <option value="Expired">Expired</option>
-              <option value="Suspended">Suspended</option>
+            <select 
+              name="registration_status" 
+              id="registration_status"
+              value={regStatus}
+              onChange={(e) => setRegStatus(e.target.value)}
+            >
+              <option value="active">Active</option>
+              <option value="expired">Expired</option>
+              <option value="suspended">Suspended</option>
             </select>
           </div>
 
