@@ -7,38 +7,46 @@ import Sidebar from "../components/Sidebar.jsx";
 import Header from "../components/Header.jsx";
 import ViolationModalAdd from "../components/ViolationComponents/ViolationModalAdd.jsx";
 import ViolationModalEdit from "../components/ViolationComponents/ViolationModalEdit.jsx";
-import "../styles/drivers.css"; 
-
+import "../styles/violation.css";
 
 function ViolationsPage() {
-  // Page/component states initialization
+  // State variables
   const [violations, setViolations] = useState([]);
   const [showAdd, setShowAdd] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [editContent, setEditContent] = useState({});
 
-  // Fetch all violations on page load
+  // Fetch all violations when component loads
   useEffect(() => {
-    getAllViolations().then((data) => setViolations(data)); 
+    getAllViolations().then((data) => setViolations(data));
   }, []);
 
-  // Loop through violations and create a row display for each
+  // Render table rows
   const violationsDisplay = violations.map((violation) => {
-    // Safely format date if it exists
     const violationDate = violation.violation_date_time
-      ? new Date(violation.violation_date_time).toDateString().slice(4)
+      ? new Date(violation.violation_date_time)
+          .toDateString()
+          .slice(4)
       : "";
 
     return (
       <>
         <div className="item">{violation.violation_id}</div>
         <div className="item">{violation.full_name}</div>
-        <div className="item">{violation.plate_no ?? "N/A"}</div>
-        <div className="item">{violation.violation_type}</div>
+        <div className="item">
+          {violation.plate_no ?? "N/A"}
+        </div>
+        <div className="item">
+          {violation.violation_type}
+        </div>
         <div className="item">{violationDate}</div>
         <div className="item">{violation.location}</div>
-        <div className="item">{violation.fine_amount}</div>
-        <div className="item">{violation.violation_status}</div>
+        <div className="item">
+          {violation.fine_amount}
+        </div>
+        <div className="item">
+          {violation.violation_status}
+        </div>
         <div className="item">
           <button
             className="button-behave view"
@@ -53,14 +61,18 @@ function ViolationsPage() {
           <button
             className="button-behave delete"
             onClick={() => {
-              const deleteId = violation.violation_id;
-              deleteViolation(deleteId); // DB delete
+              const deleteId =
+                violation.violation_id;
+
+              // Delete from database
+              deleteViolation(deleteId);
 
               // Remove from UI
               setViolations((prev) =>
                 prev.filter(
-                  (violation) => violation.violation_id !== deleteId,
-                ),
+                  (item) =>
+                    item.violation_id !== deleteId
+                )
               );
             }}
           >
@@ -77,30 +89,34 @@ function ViolationsPage() {
       <Sidebar page="violations" />
 
       <main className="main">
-        {/* Only render edit modal if showEdit is true */}
+        {/* Edit Modal */}
         {showEdit ? (
           <ViolationModalEdit
             setShow={setShowEdit}
             data={editContent}
           />
-        ) : undefined}
+        ) : null}
 
-        {/* Only render add modal if showAdd is true */}
+        {/* Add Modal */}
         {showAdd ? (
-          <ViolationModalAdd setShow={setShowAdd} />
-        ) : undefined}
+          <ViolationModalAdd
+            setShow={setShowAdd}
+          />
+        ) : null}
 
+        {/* Add Button */}
         <button
-          className="add-driver button-behave"
+          className="add-violation button-behave"
           onClick={() => setShowAdd(true)}
         >
           Add Violation
         </button>
 
-        {/* Only render table if violations is not empty */}
+        {/* Table */}
         {violations.length > 0 ? (
           <div className="table-container">
-            <div className="table header">
+            {/* Header */}
+            <div className="table header violation-table">
               <div className="item">ID</div>
               <div className="item">DRIVER</div>
               <div className="item">PLATE NO</div>
@@ -112,12 +128,15 @@ function ViolationsPage() {
               <div className="item">ACTION</div>
             </div>
 
-            <div className="table content">
+            {/* Content */}
+            <div className="table content violation-table">
               {violationsDisplay}
             </div>
           </div>
         ) : (
-          <div className="no-results">No violations</div>
+          <div className="no-results">
+            No violations
+          </div>
         )}
       </main>
     </>
