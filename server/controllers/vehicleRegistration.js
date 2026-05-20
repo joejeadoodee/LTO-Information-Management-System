@@ -28,6 +28,17 @@ const getAllRegistrations = async (req, res) => {
   }
 };
 
+const getVehicleRegistrations = async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      "SELECT * FROM vehicle v JOIN vehicleRegistration vr ON v.vehicle_id=vr.vehicle_id",
+    );
+    res.status(200).json({ success: true, data: rows });
+  } catch (err) {
+    res.status(500).json({ success: false, msg: err.message });
+  }
+};
+
 const getRegistration = async (req, res) => {
   const { id } = req.params;
   try {
@@ -169,6 +180,7 @@ const deleteRegistration = async (req, res) => {
 
 export {
   getAllRegistrations,
+  getVehicleRegistrations,
   getRegistration,
   createRegistration,
   updateRegistration,
