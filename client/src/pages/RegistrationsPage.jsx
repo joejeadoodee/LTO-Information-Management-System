@@ -27,20 +27,12 @@ function RegistrationsPage() {
   const [editContent, setEditContent] = useState(null);
 
   useEffect(() => {
-    let targetDate = filter.date;
-    if (!targetDate || !filter.registration_status || filter.registration_status === "") {
-      const farFutureDate = new Date();
-      farFutureDate.setFullYear(farFutureDate.getFullYear() + 100);
-      
-      const year = farFutureDate.getFullYear();
-      const month = String(farFutureDate.getMonth() + 1).padStart(2, '0');
-      const day = String(farFutureDate.getDate()).padStart(2, '0');
-      
-      targetDate = `${year}-${month}-${day}`;
-    }
+    // Send a valid local calendar date string to satisfy backend conditions
+    const targetDate = filter.date || getLocalTodayString();
 
     getVehiclesExpiredRegistration({ date: targetDate }).then((data) => {
       let processData = Array.isArray(data) ? data : [];
+
       if (filter.registration_status) {
         processData = processData.filter(
           (reg) => reg.registration_status?.toLowerCase() === filter.registration_status.toLowerCase()
@@ -85,18 +77,19 @@ function RegistrationsPage() {
             <div className="reg-table reg-table-content">
               {registrations.map((reg, index) => {
                 const rowId = reg.vehicle_reg_id || index;
+                
+                const displayDate = reg.expiration_date instanceof Date && !isNaN(reg.expiration_date.getTime())
+                  ? reg.expiration_date.toDateString().slice(4)
+                  : String(reg.expiration_date || "N/A");
+
                 return (
                   <div key={`reg-row-${rowId}`} style={{ display: "contents" }}>
                     <div className="reg-item">{reg.plate_no || "N/A"}</div>
-                    <div className="reg-item">{reg.make || reg.manufacturer || "N/A"}</div>
+                    <div className="reg-item">{reg.make || "N/A"}</div>
                     <div className="reg-item">{reg.model || "N/A"}</div>
                     <div className="reg-item">{reg.vehicle_type || "N/A"}</div>
                     <div className="reg-item">{reg.color || "N/A"}</div>
-                    <div className="reg-item">
-                      {reg.expiration_date && typeof reg.expiration_date.toDateString === "function"
-                        ? reg.expiration_date.toDateString().slice(4)
-                        : String(reg.expiration_date || "No Date")}
-                    </div>
+                    <div className="reg-item">{displayDate}</div>
                     <div className="reg-item">
                       <button
                         className="reg-btn-behavior reg-view-btn"

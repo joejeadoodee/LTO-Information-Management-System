@@ -1,52 +1,69 @@
 import { useEffect, useState } from "react";
-import { getAllVehicles, updateRegistration } from "../../services/registration";
+import { getAllVehicles, addRegistration } from "../../services/registration";
 
-function RegistrationModalEdit({ setShow, data: reg }) {
+function RegistrationModalAdd({ setShow }) {
   const [vehicles, setVehicles] = useState([]);
-  const [currentColor, setCurrentColor] = useState(reg.color || "");
+  const [selectedColor, setSelectedColor] = useState("");
+  const [regDate, setRegDate] = useState("");
+  const [expDate, setExpDate] = useState("");
+
+  const formatDateToString = (dateObj) => {
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
 
   useEffect(() => {
+    const today = new Date();
+    const nextYear = new Date();
+    nextYear.setFullYear(today.getFullYear() + 1);
+
+    setRegDate(formatDateToString(today));
+    setExpDate(formatDateToString(nextYear));
+
     getAllVehicles().then((data) => setVehicles(data || []));
   }, []);
 
   const handleVehicleChange = (e) => {
     const vehicleId = e.target.value;
     const matchingVehicle = vehicles.find(
-      (v) => String(v.id || v.vehicle_id) === String(vehicleId)
+      (v) => String(v.vehicle_id || v.id) === String(vehicleId)
     );
     if (matchingVehicle) {
-      setCurrentColor(matchingVehicle.color || "");
+      setSelectedColor(matchingVehicle.color || "");
+    }
+  };
+
+  const handleDateChange = (e) => {
+    const newRegDateStr = e.target.value;
+    setRegDate(newRegDateStr);
+
+    if (newRegDateStr) {
+      const currentRegDate = new Date(newRegDateStr);
+      currentRegDate.setFullYear(currentRegDate.getFullYear() + 1);
+      setExpDate(formatDateToString(currentRegDate));
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const formData = new FormData(e.target);
-    const currentFields = Object.fromEntries(formData);
-    
-    await updateRegistration({ 
-      ...currentFields, 
-      vehicle_reg_id: reg.vehicle_reg_id,
-      registration_no: reg.registration_no 
-    });
-    setShow(false);
-    window.location.reload();
-  };
 
-  const safeFormatDate = (dateVal) => {
-    if (!dateVal) return "";
-    try {
-      if (dateVal instanceof Date) {
-        if (isNaN(dateVal.getTime())) return ""; 
-        const year = dateVal.getFullYear();
-        const month = String(dateVal.getMonth() + 1).padStart(2, '0'); 
-        const day = String(dateVal.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-      }
-      const dateStr = String(dateVal);
-      if (dateStr.includes("T")) return dateStr.split("T")[0];
-      return dateStr.slice(0, 10);
-    } catch { return ""; }
+    const formData = new FormData(e.target);
+    const rawData = Object.fromEntries(formData);
+    
+    // Pass raw form elements directly to allow your backend body-parser to extract values
+    const cleanPayload = {
+      registration_no: "REG-" + Math.floor(100000 + Math.random() * 900000),
+      registration_date: rawData.registration_date,
+      expiration_date: rawData.expiration_date,
+      registration_status: rawData.registration_status,
+      vehicle_id: rawData.vehicle_id // Sent as standard form field value string
+    };
+
+    await addRegistration(cleanPayload);
+    setShow(false); 
+    window.location.reload(); 
   };
 
   return (
@@ -58,26 +75,25 @@ function RegistrationModalEdit({ setShow, data: reg }) {
           </div>
           
           <div className="reg-form-field-group">
-            <label>Plate Number</label>
-            <div className="reg-static-text-display">
-              {reg.plate_no || "N/A"}
-            </div>
-          </div>
-
-          <div className="reg-form-field-group">
-            <label htmlFor="vehicle_id">Associated Vehicle</label>
+            <label htmlFor="vehicle_id">Select Vehicle</label>
             <select 
               name="vehicle_id" 
               id="vehicle_id" 
-              defaultValue={reg.vehicle_id} 
-              onChange={handleVehicleChange} 
-              required
+              required 
+              defaultValue="" 
+              onChange={handleVehicleChange}
             >
-              {vehicles.map(v => (
-                <option key={v.id || v.vehicle_id} value={v.id || v.vehicle_id}>
-                  {v.plate_no} - {v.make || v.manufacturer} {v.model}
-                </option>
-              ))}
+              <option value="" disabled hidden>
+                Choose a vehicle...
+              </option>
+              {vehicles.map((v) => {
+                const actualId = v.vehicle_id || v.id;
+                return (
+                  <option key={`veh-opt-${actualId}`} value={actualId}>
+                    {v.plate_no || "Unknown Plate"} - {v.model || v.make || "Vehicle Entry"}
+                  </option>
+                );
+              })}
             </select>
           </div>
 
@@ -87,37 +103,40 @@ function RegistrationModalEdit({ setShow, data: reg }) {
               type="text" 
               name="color" 
               id="color" 
-              value={currentColor} 
-              onChange={(e) => setCurrentColor(e.target.value)}
+              value={selectedColor}
+              onChange={(e) => setSelectedColor(e.target.value)}
+              placeholder="Auto-fills on selection"
               required 
             />
           </div>
 
           <div className="reg-form-field-group">
             <label htmlFor="registration_date">Registration Date</label>
-            <input 
-              type="date" 
-              name="registration_date" 
+            <input
+              type="date"
+              name="registration_date"
               id="registration_date"
-              defaultValue={safeFormatDate(reg.registration_date)} 
-              required 
+              value={regDate}
+              onChange={handleDateChange}
+              required
             />
           </div>
 
           <div className="reg-form-field-group">
             <label htmlFor="expiration_date">Expiration Date</label>
-            <input 
-              type="date" 
-              name="expiration_date" 
+            <input
+              type="date"
+              name="expiration_date"
               id="expiration_date"
-              defaultValue={safeFormatDate(reg.expiration_date)} 
-              required 
+              value={expDate}
+              onChange={(e) => setExpDate(e.target.value)}
+              required
             />
           </div>
 
           <div className="reg-form-field-group">
             <label htmlFor="registration_status">Registration Status</label>
-            <select name="registration_status" id="registration_status" defaultValue={reg.registration_status}>
+            <select name="registration_status" id="registration_status">
               <option value="Active">Active</option>
               <option value="Expired">Expired</option>
               <option value="Suspended">Suspended</option>
@@ -125,8 +144,12 @@ function RegistrationModalEdit({ setShow, data: reg }) {
           </div>
 
           <div className="reg-modal-button-container">
-            <button type="button" className="reg-cancel" onClick={() => setShow(false)}>Cancel</button>
-            <button type="submit" className="reg-save">Save Changes</button>
+            <button className="reg-cancel" type="button" onClick={() => setShow(false)}>
+              Cancel
+            </button>
+            <button type="submit" className="reg-save">
+              Save
+            </button>
           </div>
         </form>
       </div>
@@ -134,4 +157,4 @@ function RegistrationModalEdit({ setShow, data: reg }) {
   );
 }
 
-export default RegistrationModalEdit;
+export default RegistrationModalAdd;

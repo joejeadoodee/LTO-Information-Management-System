@@ -2,17 +2,17 @@ import axios from "axios";
 
 async function getVehiclesExpiredRegistration({ date }) {
   try {
-    // 1. Fetch from your original, active backend endpoint path
+    // 1. Hit your original backend endpoint structure
     const response = await axios.get(`/api/vehicle/expired-registration?date=${date}`);
     
-    // Unpack using the exact same structural layout your drivers system uses
+    // Unpack exactly how your drivers endpoints are structured: response.data.data
     const regRecords = response.data?.data || [];
 
-    // 2. Fetch the corresponding vehicles to link columns
+    // 2. Pull down the active vehicle registry
     const resVehicles = await axios.get("/api/vehicle");
     const vehicleRecords = resVehicles.data?.data || [];
 
-    // 3. Complete data join reconciliation
+    // 3. Complete a dataset merge on the client side
     const formatted = regRecords.map((reg) => {
       const matchedCar = vehicleRecords.find(
         (v) => v && String(v.vehicle_id || v.id) === String(reg.vehicle_id)
@@ -33,7 +33,7 @@ async function getVehiclesExpiredRegistration({ date }) {
 
     return formatted;
   } catch (error) {
-    console.error("Service layer fetch transaction crashed:", error);
+    console.error("Error mapping vehicle collections:", error);
     return [];
   }
 }

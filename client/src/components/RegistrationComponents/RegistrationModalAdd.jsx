@@ -14,7 +14,6 @@ function RegistrationModalAdd({ setShow }) {
     return `${year}-${month}-${day}`;
   };
 
-  // 1. Load dynamic vehicle selection lists directly from your SQL backend
   useEffect(() => {
     const today = new Date();
     const nextYear = new Date();
@@ -26,18 +25,16 @@ function RegistrationModalAdd({ setShow }) {
     getAllVehicles().then((data) => setVehicles(data || []));
   }, []);
 
-  // 2. Automatically update color input state when a vehicle is selected
   const handleVehicleChange = (e) => {
     const vehicleId = e.target.value;
     const matchingVehicle = vehicles.find(
-      (v) => String(v.vehicle_id) === String(vehicleId)
+      (v) => String(v.vehicle_id || v.id) === String(vehicleId)
     );
     if (matchingVehicle) {
       setSelectedColor(matchingVehicle.color || "");
     }
   };
 
-  // 3. Dynamic year projection utility
   const handleDateChange = (e) => {
     const newRegDateStr = e.target.value;
     setRegDate(newRegDateStr);
@@ -55,19 +52,18 @@ function RegistrationModalAdd({ setShow }) {
     const formData = new FormData(e.target);
     const rawData = Object.fromEntries(formData);
     
-    // SANITIZATION payload construction targeting your server parameters precisely
+    // Pass raw form elements directly to allow your backend body-parser to extract values
     const cleanPayload = {
       registration_no: "REG-" + Math.floor(100000 + Math.random() * 900000),
       registration_date: rawData.registration_date,
       expiration_date: rawData.expiration_date,
       registration_status: rawData.registration_status,
-      // Forces the value to a clear integer digit for database foreign key alignments
-      vehicle_id: Number(rawData.vehicle_id)
+      vehicle_id: rawData.vehicle_id // Sent as standard form field value string
     };
 
     await addRegistration(cleanPayload);
     setShow(false); 
-    window.location.reload(); // Instantly triggers a complete reload to display the new table row
+    window.location.reload(); 
   };
 
   return (
@@ -90,12 +86,14 @@ function RegistrationModalAdd({ setShow }) {
               <option value="" disabled hidden>
                 Choose a vehicle...
               </option>
-              {vehicles.map((v) => (
-                // CRITICAL FIX: Explicitly binds to vehicle_id to resolve backend payload validation rejections
-                <option key={`veh-opt-${v.vehicle_id}`} value={v.vehicle_id}>
-                  {v.plate_no} — {v.model || v.make || "Vehicle Entry"}
-                </option>
-              ))}
+              {vehicles.map((v) => {
+                const actualId = v.vehicle_id || v.id;
+                return (
+                  <option key={`veh-opt-${actualId}`} value={actualId}>
+                    {v.plate_no || "Unknown Plate"} - {v.model || v.make || "Vehicle Entry"}
+                  </option>
+                );
+              })}
             </select>
           </div>
 
@@ -146,11 +144,7 @@ function RegistrationModalAdd({ setShow }) {
           </div>
 
           <div className="reg-modal-button-container">
-            <button
-              className="reg-cancel"
-              type="button"
-              onClick={() => setShow(false)}
-            >
+            <button className="reg-cancel" type="button" onClick={() => setShow(false)}>
               Cancel
             </button>
             <button type="submit" className="reg-save">
