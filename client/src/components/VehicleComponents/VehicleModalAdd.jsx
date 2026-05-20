@@ -44,9 +44,9 @@ function VehicleModalAdd({ setShow, drivers = [], onSaved = () => {} }) {
             <label htmlFor="vehicle_type">Vehicle Type</label>
             <select name="vehicle_type" id="vehicle_type">
               <option value="">Select type</option>
-              <option value="motorcycle">Motorcycle</option>
-              <option value="private car">Private Car</option>
-              <option value="public utility vehicle">Public Utility Vehicle</option>
+              <option value="Motorcycle">Motorcycle</option>
+              <option value="Private Car">Private Car</option>
+              <option value="Public Utility Vehicle">Public Utility Vehicle</option>
             </select>
           </div>
 
