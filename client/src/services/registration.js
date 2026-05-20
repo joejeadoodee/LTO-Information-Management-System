@@ -2,12 +2,18 @@ import axios from "axios";
 
 async function getVehiclesExpiredRegistration({ date }) {
   try {
-    const resReg = await axios.get(`/api/vehicle/expired-registration?date=${date}`);
-    const regRecords = resReg.data?.data || [];
+    // 1. Fetch from your original, active backend endpoint path
+    const response = await axios.get(`/api/vehicle/expired-registration?date=${date}`);
+    
+    // Unpack using the exact same structural layout your drivers system uses
+    const regRecords = response.data?.data || [];
+
+    // 2. Fetch the corresponding vehicles to link columns
     const resVehicles = await axios.get("/api/vehicle");
     const vehicleRecords = resVehicles.data?.data || [];
+
+    // 3. Complete data join reconciliation
     const formatted = regRecords.map((reg) => {
-      // Find the car profile where the primary keys align perfectly
       const matchedCar = vehicleRecords.find(
         (v) => v && String(v.vehicle_id || v.id) === String(reg.vehicle_id)
       );
@@ -16,7 +22,8 @@ async function getVehiclesExpiredRegistration({ date }) {
         ...reg,
         registration_date: reg.registration_date ? new Date(reg.registration_date) : null,
         expiration_date: reg.expiration_date ? new Date(reg.expiration_date) : null,
-        plate_no: matchedCar?.plate_no || "Unknown",
+        
+        plate_no: matchedCar?.plate_no || "N/A",
         make: matchedCar?.make || matchedCar?.manufacturer || "N/A",
         model: matchedCar?.model || "N/A",
         vehicle_type: matchedCar?.vehicle_type || matchedCar?.type || "N/A",
@@ -26,51 +33,45 @@ async function getVehiclesExpiredRegistration({ date }) {
 
     return formatted;
   } catch (error) {
-    console.error("Critical cross-wire mapping failed:", error);
+    console.error("Service layer fetch transaction crashed:", error);
     return [];
   }
 }
 
-// Fetches the collection of existing vehicles to feed selection dropdowns
 async function getAllVehicles() {
   try {
-    const {
-      data: { data },
-    } = await axios.get("/api/vehicle"); // Target endpoint mapping to your vehicle lists
-    return data || [];
+    const response = await axios.get("/api/vehicle");
+    return response.data?.data || [];
   } catch (error) {
-    console.log("Error pulling drop-down options:", error);
+    console.error(error);
     return [];
   }
 }
 
-// Records a fresh vehicle registration log instance inside the schema
 async function addRegistration(payload) {
   try {
-    const { data } = await axios.post("/api/vehicle/registration", payload);
-    return data;
+    const response = await axios.post("/api/vehicle/registration", payload);
+    return response.data;
   } catch (error) {
-    console.log("Error posting registration data payload:", error);
+    console.error(error);
   }
 }
 
-// Modifies an active historic log instance target by its primary auto-increment key
 async function updateRegistration(payload) {
   try {
-    const { data } = await axios.put(`/api/vehicle/registration/${payload.vehicle_reg_id}`, payload);
-    return data;
+    const response = await axios.put(`/api/vehicle/registration/${payload.vehicle_reg_id}`, payload);
+    return response.data;
   } catch (error) {
-    console.log("Error updating registration row records:", error);
+    console.error(error);
   }
 }
 
-// Drops a record row cleanly using standard route parameter patterns
 async function deleteRegistration(id) {
   try {
-    const { data } = await axios.delete(`/api/vehicle/registration/${id}`);
-    return data;
+    const response = await axios.delete(`/api/vehicle/registration/${id}`);
+    return response.data;
   } catch (error) {
-    console.log("Error invoking database row removal handler:", error);
+    console.error(error);
   }
 }
 
