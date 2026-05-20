@@ -37,15 +37,16 @@ function RegistrationFilters({ setFilter }) {
 
   return (
     <form ref={formRef} onSubmit={handleSubmit} className="reg-filter-form-row">
+      {/* SANITIZED VALUES: Matches lowercase strings perfectly for filtering validation */}
       <select 
         name="registration_status" 
         id="registration_status" 
         defaultValue=""
       >
         <option value="">All Registrations</option>
-        <option value="Active">Active</option>
-        <option value="Expired">Expired</option>
-        <option value="Suspended">Suspended</option>
+        <option value="active">Active</option>
+        <option value="expired">Expired</option>
+        <option value="suspended">Suspended</option>
       </select>
 
       <div className="reg-filter-date-group">

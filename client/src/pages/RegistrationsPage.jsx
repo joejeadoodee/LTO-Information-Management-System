@@ -8,7 +8,6 @@ import RegistrationFilters from "../components/RegistrationComponents/Registrati
 import "../styles/registration.css"; 
 
 function RegistrationsPage() {
-  // Helper to generate local "YYYY-MM-DD" safely to resolve timezone shifts
   const getLocalTodayString = () => {
     const today = new Date();
     const year = today.getFullYear();
@@ -17,7 +16,6 @@ function RegistrationsPage() {
     return `${year}-${month}-${day}`;
   };
 
-  // State initialized to a safe local date string to satisfy the backend's validation rules
   const [filter, setFilter] = useState({ 
     date: getLocalTodayString(), 
     registration_status: "" 
@@ -30,7 +28,11 @@ function RegistrationsPage() {
 
   useEffect(() => {
     let targetDate = filter.date;
-    if (!filter.registration_status || filter.registration_status === "") {
+
+    // DYNAMIC RULE FIX: If date filter parameter is missing, falsy, or cleared,
+    // calculate a dynamic date 100 years into the future so your backend query 
+    // satisfies validation and returns all entries cleanly.
+    if (!targetDate || !filter.registration_status || filter.registration_status === "") {
       const farFutureDate = new Date();
       farFutureDate.setFullYear(farFutureDate.getFullYear() + 100);
       
@@ -44,6 +46,7 @@ function RegistrationsPage() {
     getVehiclesExpiredRegistration({ date: targetDate }).then((data) => {
       let processData = Array.isArray(data) ? data : [];
 
+      // Flexible matching handling both uppercase "Active" and lowercase "active" structures
       if (filter.registration_status) {
         processData = processData.filter(
           (reg) => reg.registration_status?.toLowerCase() === filter.registration_status.toLowerCase()
@@ -91,7 +94,7 @@ function RegistrationsPage() {
                 return (
                   <div key={`reg-row-${rowId}`} style={{ display: "contents" }}>
                     <div className="reg-item">{reg.plate_no || "N/A"}</div>
-                    <div className="reg-item">{reg.make || "N/A"}</div>
+                    <div className="reg-item">{reg.make || reg.manufacturer || "N/A"}</div>
                     <div className="reg-item">{reg.model || "N/A"}</div>
                     <div className="reg-item">{reg.vehicle_type || "N/A"}</div>
                     <div className="reg-item">{reg.color || "N/A"}</div>

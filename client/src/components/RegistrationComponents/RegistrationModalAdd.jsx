@@ -14,6 +14,7 @@ function RegistrationModalAdd({ setShow }) {
     return `${year}-${month}-${day}`;
   };
 
+  // 1. Load dynamic vehicle selection lists directly from your SQL backend
   useEffect(() => {
     const today = new Date();
     const nextYear = new Date();
@@ -22,22 +23,21 @@ function RegistrationModalAdd({ setShow }) {
     setRegDate(formatDateToString(today));
     setExpDate(formatDateToString(nextYear));
 
-    getAllVehicles().then((data) => {
-      console.log("Raw vehicles pulled from database:", data);
-      setVehicles(data || []);
-    });
+    getAllVehicles().then((data) => setVehicles(data || []));
   }, []);
 
+  // 2. Automatically update color input state when a vehicle is selected
   const handleVehicleChange = (e) => {
     const vehicleId = e.target.value;
     const matchingVehicle = vehicles.find(
-      (v) => String(v.vehicle_id || v.id) === String(vehicleId)
+      (v) => String(v.vehicle_id) === String(vehicleId)
     );
     if (matchingVehicle) {
       setSelectedColor(matchingVehicle.color || "");
     }
   };
 
+  // 3. Dynamic year projection utility
   const handleDateChange = (e) => {
     const newRegDateStr = e.target.value;
     setRegDate(newRegDateStr);
@@ -55,25 +55,19 @@ function RegistrationModalAdd({ setShow }) {
     const formData = new FormData(e.target);
     const rawData = Object.fromEntries(formData);
     
-    // SANITIZATION LAYER: Build the precise payload structure your backend query demands
-    const cleanedPayload = {
+    // SANITIZATION payload construction targeting your server parameters precisely
+    const cleanPayload = {
       registration_no: "REG-" + Math.floor(100000 + Math.random() * 900000),
       registration_date: rawData.registration_date,
       expiration_date: rawData.expiration_date,
-      // Converts "Active" -> "active" to resolve potential SQL ENUM case-sensitivity crashes
-      registration_status: String(rawData.registration_status).toLowerCase(),
-      // Forces the ID into a strict integer digit for the SQL foreign key match
+      registration_status: rawData.registration_status,
+      // Forces the value to a clear integer digit for database foreign key alignments
       vehicle_id: Number(rawData.vehicle_id)
     };
 
-    // Open your browser inspector tool to verify this payload structure live!
-    console.log("CLEANED PAYLOAD Dispatched to Express Server:", cleanedPayload);
-
-    const response = await addRegistration(cleanedPayload);
-    console.log("SERVER RESPONSE AFTER INSERTION:", response);
-
+    await addRegistration(cleanPayload);
     setShow(false); 
-    window.location.reload(); 
+    window.location.reload(); // Instantly triggers a complete reload to display the new table row
   };
 
   return (
@@ -96,14 +90,12 @@ function RegistrationModalAdd({ setShow }) {
               <option value="" disabled hidden>
                 Choose a vehicle...
               </option>
-              {vehicles.map((v) => {
-                const actualId = v.vehicle_id || v.id;
-                return (
-                  <option key={`veh-opt-${actualId}`} value={actualId}>
-                    {v.plate_no || "Unknown Plate"} - {v.model || v.make || "Vehicle Entry"}
-                  </option>
-                );
-              })}
+              {vehicles.map((v) => (
+                // CRITICAL FIX: Explicitly binds to vehicle_id to resolve backend payload validation rejections
+                <option key={`veh-opt-${v.vehicle_id}`} value={v.vehicle_id}>
+                  {v.plate_no} — {v.model || v.make || "Vehicle Entry"}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -147,9 +139,9 @@ function RegistrationModalAdd({ setShow }) {
           <div className="reg-form-field-group">
             <label htmlFor="registration_status">Registration Status</label>
             <select name="registration_status" id="registration_status">
-              <option value="active">Active</option>
-              <option value="expired">Expired</option>
-              <option value="suspended">Suspended</option>
+              <option value="Active">Active</option>
+              <option value="Expired">Expired</option>
+              <option value="Suspended">Suspended</option>
             </select>
           </div>
 

@@ -2,19 +2,31 @@ import axios from "axios";
 
 async function getVehiclesExpiredRegistration({ date }) {
   try {
-    const {
-      data: { data },
-    } = await axios.get(`/api/vehicle/expired-registration?date=${date}`);
+    const resReg = await axios.get(`/api/vehicle/expired-registration?date=${date}`);
+    const regRecords = resReg.data?.data || [];
+    const resVehicles = await axios.get("/api/vehicle");
+    const vehicleRecords = resVehicles.data?.data || [];
+    const formatted = regRecords.map((reg) => {
+      // Find the car profile where the primary keys align perfectly
+      const matchedCar = vehicleRecords.find(
+        (v) => v && String(v.vehicle_id || v.id) === String(reg.vehicle_id)
+      );
 
-    const formatted = data.map((reg) => ({
-      ...reg,
-      registration_date: new Date(reg.registration_date), 
-      expiration_date: new Date(reg.expiration_date),     
-    }));
+      return {
+        ...reg,
+        registration_date: reg.registration_date ? new Date(reg.registration_date) : null,
+        expiration_date: reg.expiration_date ? new Date(reg.expiration_date) : null,
+        plate_no: matchedCar?.plate_no || "Unknown",
+        make: matchedCar?.make || matchedCar?.manufacturer || "N/A",
+        model: matchedCar?.model || "N/A",
+        vehicle_type: matchedCar?.vehicle_type || matchedCar?.type || "N/A",
+        color: matchedCar?.color || reg.color || "N/A"
+      };
+    });
 
     return formatted;
   } catch (error) {
-    console.log(error);
+    console.error("Critical cross-wire mapping failed:", error);
     return [];
   }
 }
