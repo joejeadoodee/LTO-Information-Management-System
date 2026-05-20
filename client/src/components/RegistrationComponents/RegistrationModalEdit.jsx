@@ -126,7 +126,7 @@ function RegistrationModalEdit({ setShow, data: reg }) {
 
           <div className="reg-modal-button-container">
             <button type="button" className="reg-cancel" onClick={() => setShow(false)}>Cancel</button>
-            <button type="submit" className="reg-save">Edit Registration</button>
+            <button type="submit" className="reg-save">Save Changes</button>
           </div>
         </form>
       </div>
