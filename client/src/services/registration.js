@@ -2,17 +2,10 @@ import axios from "axios";
 
 async function getVehiclesExpiredRegistration({ date }) {
   try {
-    // 1. Hit your original backend endpoint structure
     const response = await axios.get(`/api/vehicle/expired-registration?date=${date}`);
-    
-    // Unpack exactly how your drivers endpoints are structured: response.data.data
     const regRecords = response.data?.data || [];
-
-    // 2. Pull down the active vehicle registry
     const resVehicles = await axios.get("/api/vehicle");
     const vehicleRecords = resVehicles.data?.data || [];
-
-    // 3. Complete a dataset merge on the client side
     const formatted = regRecords.map((reg) => {
       const matchedCar = vehicleRecords.find(
         (v) => v && String(v.vehicle_id || v.id) === String(reg.vehicle_id)
@@ -22,7 +15,6 @@ async function getVehiclesExpiredRegistration({ date }) {
         ...reg,
         registration_date: reg.registration_date ? new Date(reg.registration_date) : null,
         expiration_date: reg.expiration_date ? new Date(reg.expiration_date) : null,
-        
         plate_no: matchedCar?.plate_no || "N/A",
         make: matchedCar?.make || matchedCar?.manufacturer || "N/A",
         model: matchedCar?.model || "N/A",
