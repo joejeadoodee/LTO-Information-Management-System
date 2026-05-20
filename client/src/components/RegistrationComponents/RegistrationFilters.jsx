@@ -37,7 +37,6 @@ function RegistrationFilters({ setFilter }) {
 
   return (
     <form ref={formRef} onSubmit={handleSubmit} className="reg-filter-form-row">
-      {/* SANITIZED VALUES: Matches lowercase strings perfectly for filtering validation */}
       <select 
         name="registration_status" 
         id="registration_status" 
