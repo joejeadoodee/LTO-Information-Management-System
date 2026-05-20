@@ -1,3 +1,8 @@
+# HOW TO SETUP AND RUN THE PROGRAM
+
+    chmod +x run.sh
+    ./run.sh
+
 Some notes first. Most of the content of the server are AI generated boiler plate, further testing is required. The client side front-end still needs to be done. Also, if nageexit agad ung server instance sa inyo, most likely merong kumukuha ng localhost:5000. Hanapin nyo lang kung alin sya (in my case docker ung kumukuha) tapos iclose nyo. 
 
 ```js
