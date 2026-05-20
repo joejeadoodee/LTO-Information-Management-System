@@ -1,13 +1,28 @@
 import { useEffect, useState } from "react";
 import { getAllVehicles, addRegistration } from "../../services/registration";
 
-function RegistrationModalAdd({ setShow, setFetchCounter }) {
+function RegistrationModalAdd({ setShow, setFetchCounter, allRegistrations }) {
   const [vehicles, setVehicles] = useState([]);
   const [selectedColor, setSelectedColor] = useState("");
-  const [regNo, setRegNo] = useState("");
   const [regDate, setRegDate] = useState("");
   const [expDate, setExpDate] = useState("");
   const [regStatus, setRegStatus] = useState("active");
+
+  // Calculate global max incremented ID
+  const calculateNextGlobalId = () => {
+    if (!allRegistrations || allRegistrations.length === 0) return "100000001";
+    
+    const numericIds = allRegistrations
+      .map(r => parseInt(r.registration_no, 10))
+      .filter(num => !isNaN(num));
+
+    if (numericIds.length === 0) return "100000001";
+    
+    const maxId = Math.max(...numericIds);
+    return String(maxId + 1);
+  };
+
+  const nextCalculatedAddId = calculateNextGlobalId();
 
   const formatDateToString = (dateObj) => {
     const year = dateObj.getFullYear();
@@ -55,7 +70,7 @@ function RegistrationModalAdd({ setShow, setFetchCounter }) {
     const rawData = Object.fromEntries(formData);
     
     const cleanPayload = {
-      registration_no: regNo,
+      registration_no: nextCalculatedAddId, // Locked System Generated Value
       registration_date: rawData.registration_date,
       expiration_date: rawData.expiration_date,
       registration_status: regStatus,
@@ -99,15 +114,13 @@ function RegistrationModalAdd({ setShow, setFetchCounter }) {
           </div>
 
           <div className="reg-form-field-group">
-            <label htmlFor="registration_no">Registration ID / Number</label>
+            <label htmlFor="registration_no_display">Registration ID / Number</label>
             <input 
               type="text" 
-              id="registration_no"
-              maxLength="9"
-              value={regNo} 
-              onChange={(e) => setRegNo(e.target.value)} 
-              placeholder="Enter Registration ID" 
-              required 
+              id="registration_no_display"
+              value={nextCalculatedAddId} 
+              disabled 
+              style={{ backgroundColor: "#e9ecef", fontWeight: "bold", color: "#495057" }}
             />
           </div>
 

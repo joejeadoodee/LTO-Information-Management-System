@@ -48,10 +48,19 @@ function RegistrationsPage() {
       <Sidebar page="registrations" />
       <main className="reg-main-container">
         {showEdit && modalContent && (
-          <RegistrationModalEdit setShow={setShowEdit} data={modalContent} setFetchCounter={setFetchCounter} />
+          <RegistrationModalEdit 
+            setShow={setShowEdit} 
+            data={modalContent} 
+            setFetchCounter={setFetchCounter} 
+            allRegistrations={registrations}
+          />
         )}
         {showAdd && (
-          <RegistrationModalAdd setShow={setShowAdd} setFetchCounter={setFetchCounter} />
+          <RegistrationModalAdd 
+            setShow={setShowAdd} 
+            setFetchCounter={setFetchCounter} 
+            allRegistrations={registrations}
+          />
         )}
 
         <button

@@ -1,20 +1,33 @@
 import { useState, useEffect } from "react";
 import { updateRegistration } from "../../services/registration";
 
-function RegistrationModalEdit({ setShow, data, setFetchCounter }) {
+function RegistrationModalEdit({ setShow, data, setFetchCounter, allRegistrations }) {
   if (!data) return null;
 
-  // 1. Existing Registration Record States
   const [currentColor, setCurrentColor] = useState(data.color || "");
   const [regStatus, setRegStatus] = useState(data.registration_status || "active");
   const [regNo, setRegNo] = useState(data.registration_no || "");
 
-  // 2. Optional Renewal Section States
   const [isRenewing, setIsRenewing] = useState(false);
   const [renewalDate, setRenewalDate] = useState("");
   const [renewalExpDate, setRenewalExpDate] = useState("");
 
-  // Helper to safely format DB strings to HTML input elements (YYYY-MM-DD)
+  // Calculate next global incremented ID for renewal flows
+  const calculateNextRenewalId = () => {
+    if (!allRegistrations || allRegistrations.length === 0) return "100000001";
+    
+    const numericIds = allRegistrations
+      .map(r => parseInt(r.registration_no, 10))
+      .filter(num => !isNaN(num));
+      
+    if (numericIds.length === 0) return "100000001";
+    
+    const maxId = Math.max(...numericIds);
+    return String(maxId + 1);
+  };
+
+  const nextCalculatedRenewalId = calculateNextRenewalId();
+
   const safeFormatDate = (dateVal) => {
     if (!dateVal) return "";
     try {
@@ -32,10 +45,6 @@ function RegistrationModalEdit({ setShow, data, setFetchCounter }) {
   const [regDate, setRegDate] = useState(safeFormatDate(data.registration_date));
   const [expDate, setExpDate] = useState(safeFormatDate(data.expiration_date));
 
-  // 3. Auto-Calculate the Next Incremented Renewal ID
-  const currentNumericId = parseInt(data.registration_no, 10);
-  const nextIncrementedId = !isNaN(currentNumericId) ? String(currentNumericId + 1) : "";
-
   useEffect(() => {
     if (data) {
       setCurrentColor(data.color || "");
@@ -44,7 +53,6 @@ function RegistrationModalEdit({ setShow, data, setFetchCounter }) {
       setRegDate(safeFormatDate(data.registration_date));
       setExpDate(safeFormatDate(data.expiration_date));
       
-      // Reset optional renewal section on data change
       setIsRenewing(false);
       setRenewalDate("");
       setRenewalExpDate("");
@@ -59,16 +67,15 @@ function RegistrationModalEdit({ setShow, data, setFetchCounter }) {
       let finalExpDate = expDate;
       let finalStatus = regStatus;
 
-      // If they opted to fill out the renewal fields, override payload properties
       if (isRenewing) {
         if (!renewalDate || !renewalExpDate) {
-          alert("Please fill in both the Renewal Date and Expiration Date.");
+          alert("Please populate the Renewal Date and Expiration Date fields.");
           return;
         }
-        finalRegNo = nextIncrementedId;
+        finalRegNo = nextCalculatedRenewalId;
         finalRegDate = renewalDate;
         finalExpDate = renewalExpDate;
-        finalStatus = "active"; // Renewals automatically set state back to active
+        finalStatus = "active"; 
       }
 
       const updatedPayload = {
@@ -84,13 +91,13 @@ function RegistrationModalEdit({ setShow, data, setFetchCounter }) {
       setFetchCounter((prev) => prev + 1);
       setShow(false);
     } catch (err) {
-      console.error("Form processing failure:", err);
+      console.error("Form execution lifecycle failure:", err);
     }
   };
 
   return (
     <div className="reg-add-form-overlay edit-modal-specific">
-      <div className="reg-modal-wrapper-box" style={{ width: "500px", maxHeight: "90vh", overflowY: "auto" }}>
+      <div className="reg-modal-wrapper-box" style={{ width: "550px", maxHeight: "90vh", overflowY: "auto" }}>
         <form onSubmit={handleSubmit}>
           <div>
             <h3>REGISTRATION DETAILS</h3>
@@ -112,9 +119,8 @@ function RegistrationModalEdit({ setShow, data, setFetchCounter }) {
               type="text"
               id="registration_no"
               value={regNo}
-              onChange={(e) => setRegNo(e.target.value)}
-              disabled={isRenewing} // Lock down if renewal flow is active
-              required
+              disabled // Locked by default for view/edit compliance
+              style={{ backgroundColor: "#e9ecef" }}
             />
           </div>
 
@@ -167,7 +173,7 @@ function RegistrationModalEdit({ setShow, data, setFetchCounter }) {
             </select>
           </div>
 
-          {/* --- OPTIONAL RENEWAL TOGGLE CHECKBOX --- */}
+          {/* --- OPTIONAL RENEWAL AREA --- */}
           <div style={{ margin: "20px 0 10px 0", display: "flex", alignItems: "center", gap: "8px" }}>
             <input 
               type="checkbox" 
@@ -181,16 +187,15 @@ function RegistrationModalEdit({ setShow, data, setFetchCounter }) {
             </label>
           </div>
 
-          {/* --- CONDITIONALLY RENDERED OPTIONAL RENEWAL FORM FIELDS --- */}
           {isRenewing && (
             <div style={{ borderLeft: "4px solid #28a745", paddingLeft: "15px", marginBottom: "20px", backgroundColor: "#f9f9f9", padding: "10px" }}>
               <div className="reg-form-field-group">
-                <label style={{ color: "#28a745" }}>New Renewal ID (Incremental / Locked)</label>
+                <label style={{ color: "#28a745" }}>Registration ID</label>
                 <input 
                   type="text" 
-                  value={nextIncrementedId} 
+                  value={nextCalculatedRenewalId} 
                   disabled 
-                  style={{ backgroundColor: "#e9ecef", fontWeight: "bold" }}
+                  style={{ backgroundColor: "#e9ecef", fontWeight: "bold", color: "#28a745" }}
                 />
               </div>
 
